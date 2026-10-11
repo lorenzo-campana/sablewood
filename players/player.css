@@ -695,3 +695,7 @@ body.eq-dragging [data-eq-slot]{outline:2px dashed color-mix(in srgb,var(--sheet
 .pl-print-bar .btn:not(.pri){background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.35)}.pl-print-bar .btn:not(.pri):hover{background:rgba(255,255,255,.2)}
 /* l'anteprima ingrandita resta con gli angoli arrotondati: squadrate solo le carte da ritagliare */
 .eq-lb-scale .eq-print{border-radius:2.4mm!important}.eq-lb-scale .eq-print-in .cd-i{border-radius:17px!important}
+/* la foto della mini card ha già la sua cornice 3:2 prima che l'immagine sia decodificata: niente salto quando si apre */
+.eq-print-in .eq-art{position:relative;width:100%;overflow:hidden}.eq-print-in .eq-art img{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;object-fit:cover}
+/* l'animazione d'entrata di .pl sovrascrive lo scale: la carta compariva gigante e poi si rimpiccioliva */
+.eq-print-in,.eq-lb-scale{animation:none!important}
