@@ -609,3 +609,13 @@ html{scrollbar-gutter:stable}.pv-hub.glass .hub-nav .nb{display:inline-block}#ba
 .pl-official-sheet .pl-defense-values>div small{top:73.1%;height:17.2%!important;bottom:auto!important;display:flex;align-items:center;justify-content:center;line-height:1}
 .pl-official-sheet .pl-defense-values>div:nth-child(2) small{top:70.6%;height:16.6%!important}
 .pr-shield small{font-size:7.6pt}
+/* Class Feature come sul manuale: cornice a doppia linea con angoli smussati, nome in maiuscolo nero */
+.pr-panel.pr-feats{border:0!important;border-radius:0;padding:7mm 7mm 4mm 6mm;position:relative}
+.pr-frame{position:absolute;left:0;top:0;pointer-events:none;z-index:0}
+.pr-feats>h2{z-index:2}.pr-feats-in{position:relative;z-index:1}
+.pr-feat>b{font:900 1.22em/1.1 'DH Overpass',Arial,sans-serif;text-transform:uppercase;color:#1f1e22;letter-spacing:.01em;margin-bottom:.6mm}
+.pr-feat p{color:#1f1e22;line-height:1.32}.pr-feat strong{font-weight:800}
+/* Proficiency come sul manuale: trapezio appeso sotto il banner del titolo */
+.pr-prof{position:relative;margin:-2.2mm auto 2.4mm;width:max-content;padding:1.3mm 7mm 1.5mm;gap:1.1mm;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M1 1H99L92 19H8Z' fill='%23fff' stroke='%235f5e63' stroke-width='1.4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.pr-prof b{font:9pt/1 'DH Eveleth',Arial,sans-serif;text-transform:uppercase;color:#3d3c40;margin-right:1.2mm}
+.pr-prof i{width:3.6mm;height:3.6mm;border:.4mm solid #5f5e63;box-sizing:border-box}.pr-prof i.on{background:#5f5e63;box-shadow:inset 0 0 0 .5mm #fff}

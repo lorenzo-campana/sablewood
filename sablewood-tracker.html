@@ -1576,6 +1576,16 @@ html{scrollbar-gutter:stable}.pv-hub.glass .hub-nav .nb{display:inline-block}#ba
 .pl-official-sheet .pl-defense-values>div small{top:73.1%;height:17.2%!important;bottom:auto!important;display:flex;align-items:center;justify-content:center;line-height:1}
 .pl-official-sheet .pl-defense-values>div:nth-child(2) small{top:70.6%;height:16.6%!important}
 .pr-shield small{font-size:7.6pt}
+/* Class Feature come sul manuale: cornice a doppia linea con angoli smussati, nome in maiuscolo nero */
+.pr-panel.pr-feats{border:0!important;border-radius:0;padding:7mm 7mm 4mm 6mm;position:relative}
+.pr-frame{position:absolute;left:0;top:0;pointer-events:none;z-index:0}
+.pr-feats>h2{z-index:2}.pr-feats-in{position:relative;z-index:1}
+.pr-feat>b{font:900 1.22em/1.1 'DH Overpass',Arial,sans-serif;text-transform:uppercase;color:#1f1e22;letter-spacing:.01em;margin-bottom:.6mm}
+.pr-feat p{color:#1f1e22;line-height:1.32}.pr-feat strong{font-weight:800}
+/* Proficiency come sul manuale: trapezio appeso sotto il banner del titolo */
+.pr-prof{position:relative;margin:-2.2mm auto 2.4mm;width:max-content;padding:1.3mm 7mm 1.5mm;gap:1.1mm;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M1 1H99L92 19H8Z' fill='%23fff' stroke='%235f5e63' stroke-width='1.4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.pr-prof b{font:9pt/1 'DH Eveleth',Arial,sans-serif;text-transform:uppercase;color:#3d3c40;margin-right:1.2mm}
+.pr-prof i{width:3.6mm;height:3.6mm;border:.4mm solid #5f5e63;box-sizing:border-box}.pr-prof i.on{background:#5f5e63;box-shadow:inset 0 0 0 .5mm #fff}
 
 /* PLAYER_STYLE_END */
 /* RULES_STYLE_START */
@@ -5715,11 +5725,18 @@ function plHopeFxBadge(c){const s=c.classFx||{},end=(k,t)=>`<div class="pl-ha-ac
    niente carte dominio né inventory weapon (sono carte stampate tenute accanto al foglio): per armi e armatura
    equipaggiate restano i posti delle mini card 41×63 mm. Anteprima a schermo, poi PDF con html2canvas + jsPDF. */
 function plPrintBoxes(n,cls='pr-box'){return `<span class="pr-boxes">${Array.from({length:n},()=>`<i class="${cls}"></i>`).join('')}</span>`}
+// come sul manuale: in grassetto il costo con cui si apre una feature (Mark a Stress, Spend 3 Hope…)
+function plPrintBold(t){return esc(t).replace(/^((?:Mark|Spend|Clear) (?:a|an|one|two|\d+) (?:Stress|Hope|Hit Points?|Armor Slots?))/,'<strong>$1</strong>')}
+// cornice a doppia linea con angoli smussati del riquadro Class Feature, disegnata sulle misure reali del pannello
+function plPrintFrame(panel){if(!panel)return;panel.querySelector(':scope>.pr-frame')?.remove();const w=panel.offsetWidth,h=panel.offsetHeight,mm=panel.closest('.pr-page').offsetWidth/210,c=3.2*mm,g=1.1*mm,right=!!panel.closest('.pr-right');
+ // il lato aperto va verso il bordo del foglio: per la colonna destra a destra, per quella sinistra a sinistra
+ const path=(o)=>{const x0=right?o:-1,x1=right?w+1:w-o,t=o,b=h-o;return right?`M${x1} ${t}H${x0+c}L${x0} ${t+c}V${b-c}L${x0+c} ${b}H${x1}`:`M${x0} ${t}H${x1-c}L${x1} ${t+c}V${b-c}L${x1-c} ${b}H${x0}`};
+ panel.insertAdjacentHTML('afterbegin',`<svg class="pr-frame" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${path(.5)}" fill="none" stroke="#5f5e63" stroke-width="${.35*mm}"/><path d="${path(g)}" fill="none" stroke="#5f5e63" stroke-width="${.3*mm}"/></svg>`)}
 function plPrintSlots(n){return `<span class="pr-slots12">${Array.from({length:12},(_,i)=>`<i class="${i<n?'':'x'}"></i>`).join('')}</span>`}
 function plPrintSheet(c){const k=plClass(c),st=plStats(c),cls=[[c.className,k?.features]];if(c.multiclass)cls.push([c.multiclass.className,PLAYER_RULES.classes[c.multiclass.className]?.features]);
  const accent=CDOM[k.domains[0]]?.c||'#6e57a5',hopeT=String(k.hope||''),hi=hopeT.indexOf(':');
  const feats=cls.flatMap(([n,t])=>plFxParts(t).map(f=>({...f,cls:n})));
- const featHTML=feats.map(f=>`<div class="pr-feat"><b>${esc(f.name)}${cls.length>1?` <small>${esc(f.cls)}</small>`:''}</b>${f.items.map(x=>x.li!==undefined?`<p class="li">• ${esc(x.li)}</p>`:`<p>${esc(x.p)}</p>`).join('')}</div>`).join('');
+ const featHTML=feats.map(f=>`<div class="pr-feat"><b>${esc(f.name)}${cls.length>1?` <small>${esc(f.cls)}</small>`:''}</b>${f.items.map(x=>x.li!==undefined?`<p class="li">• ${plPrintBold(x.li)}</p>`:`<p>${plPrintBold(x.p)}</p>`).join('')}</div>`).join('');
  const panel=(title,body,cls='')=>`<section class="pr-panel ${cls}"><h2><span>${title}</span></h2>${body}</section>`;
  const lines=n=>Array.from({length:n},()=>'<div class="pr-line"></div>').join('');
  const xp=Array.from({length:5},(_,i)=>{const e=c.experiences[i];return `<div class="pr-xp"><span>${e?esc(e.name):''}</span><b>${e&&e.name?sgn(e.value):''}</b></div>`}).join('');
@@ -5737,12 +5754,12 @@ function plPrintSheet(c){const k=plClass(c),st=plStats(c),cls=[[c.className,k?.f
   ${panel('Gold',`<div class="pr-goldrow"><div class="pr-hand"><span>${Array.from({length:9},()=>'<i></i>').join('')}</span><small>Handfuls</small></div><div class="pr-bags"><span>${Array.from({length:9},()=>'<i></i>').join('')}</span><small>Bags</small></div><div class="pr-chest"><i></i><small>Chest</small></div></div>`)}
   ${panel('Notes',lines(4),'pr-notes')}</div>
   <div class="pr-col pr-right">
-  ${panel('Active Weapons & Armor',`<div class="pr-prof"><small>Proficiency</small>${Array.from({length:6},(_,i)=>`<i class="${i<c.proficiency?'on':''}"></i>`).join('')}</div><div class="pr-slots">${slot('Primary')}${slot('Secondary')}${slot('Armor')}</div>`)}
+  ${panel('Active Weapons & Armor',`<div class="pr-prof"><b>Proficiency</b>${Array.from({length:6},(_,i)=>`<i class="${i<c.proficiency?'on':''}"></i>`).join('')}</div><div class="pr-slots">${slot('Primary')}${slot('Secondary')}${slot('Armor')}</div>`)}
   ${panel('Inventory',`<div class="pr-armrow"><div class="pr-slot pr-stack"><b>Inventory</b><small>inventory weapon<br>e carte oggetto<br>impilate qui</small></div><div class="pr-inv"><small>Oggetti senza carta</small>${lines(6)}</div></div>`)}
   ${panel('Class Feature',`<div class="pr-feats-in">${featHTML}</div>`,'pr-feats')}</div></div>
  <footer class="pr-foot"><span>Daggerheart © Darrington Press 2025 · scheda adattata</span><span>${esc(c.name||'')} · ${esc(c.className)} ${c.level}</span></footer></div>`}
 // il testo delle feature si rimpicciolisce finché la pagina sta in un A4
-function plPrintFit(root){const page=root.querySelector('.pr-page'),f=root.querySelector('.pr-feats-in');if(!page||!f)return;let pt=9;f.style.fontSize=pt+'pt';while((f.scrollHeight>f.clientHeight+1||page.scrollHeight>page.clientHeight+1)&&pt>5.4){pt-=.2;f.style.fontSize=pt+'pt'}}
+function plPrintFit(root){const page=root.querySelector('.pr-page'),f=root.querySelector('.pr-feats-in');if(!page||!f)return;let pt=9;f.style.fontSize=pt+'pt';while((f.scrollHeight>f.clientHeight+1||page.scrollHeight>page.clientHeight+1)&&pt>5.4){pt-=.2;f.style.fontSize=pt+'pt'}plPrintFrame(f.closest('.pr-panel'))}
 function plPrintOpen(c){let el=document.getElementById('pl-print');if(!el){el=document.createElement('div');el.id='pl-print';el.className='pl-print-ov';document.body.appendChild(el)}
  el.innerHTML=`<div class="pl-print-bar"><b>Anteprima di stampa · A4</b><span class="pl-print-msg" role="status"></span><button type="button" class="btn pri" data-pl="print-pdf">Scarica PDF</button><button type="button" class="btn" data-pl="print-close">Chiudi</button></div><div class="pl-print-stage"><div class="pl-print-scale">${plPrintSheet(c)}</div></div>`;
  el.hidden=false;document.body.classList.add('pl-print-on');(document.fonts?.ready||Promise.resolve()).then(()=>{plPrintFit(el);plPrintScale()})}
