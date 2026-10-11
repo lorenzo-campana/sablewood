@@ -5822,8 +5822,8 @@ async function playerConnect(db,user){
  PL.doc.onSnapshot(s=>{try{if(s.exists){const j=s.data().json;if(j===PL.lastJson)return;plMerge(JSON.parse(j));if(!document.activeElement?.closest?.('.pl input,.pl textarea,.pl select'))plRender()}}catch(e){}},()=>{});}
  db.doc('tavolo/campagne').onSnapshot(s=>{try{PL.directory=s.exists?JSON.parse(s.data().json):[];plRenderIfVisible()}catch(e){}},()=>{});
  const roster=db.collection('tavolo/players/roster');
- if(typeof roster.onSnapshot==='function'){roster.onSnapshot(s=>{try{const rows=[];s.forEach(x=>{const o=JSON.parse(x.data().json);if(o.joined)rows.push(o)});PL.roster=rows;plStoreRoster();if(plReceiveRoster())persist();plRenderIfVisible()}catch(e){}},()=>{PL.sync='Roster non disponibile · usa Aggiorna campagne'})}
- else PL.rosterRefresh=async()=>{if(typeof roster.get!=='function')throw Error('Roster API unavailable');const s=await roster.get(),rows=[];s.forEach(x=>{const o=JSON.parse(x.data().json);if(o.joined)rows.push(o)});PL.roster=rows;plStoreRoster();plReceiveRoster();};
+ if(typeof roster.onSnapshot==='function'){roster.onSnapshot(s=>{try{const rows=[];(s.docs||[]).forEach(x=>{try{const o=JSON.parse(x.data().json);if(o.joined)rows.push(o)}catch(e){}});PL.roster=rows;plStoreRoster();if(plReceiveRoster())persist();plRenderIfVisible()}catch(e){}},()=>{PL.sync='Roster non disponibile · usa Aggiorna campagne'})}
+ else PL.rosterRefresh=async()=>{if(typeof roster.get!=='function')throw Error('Roster API unavailable');const s=await roster.get(),rows=[];(s.docs||[]).forEach(x=>{try{const o=JSON.parse(x.data().json);if(o.joined)rows.push(o)}catch(e){}});PL.roster=rows;plStoreRoster();plReceiveRoster();};
  PL.chars.forEach(plWatchGM);if(VIEW.canGM)playerPublishCampaigns();else if(PL.rosterRefresh)await PL.rosterRefresh().catch(()=>{});plRenderIfVisible();
 }
 function plRenderIfVisible(){if((VIEW.mode==='player'&&['personaggi','equipaggiamenti'].includes(plSecNow())||(APP.view==='home'||APP.view==='camp')&&APP.sec==='personaggi')&&!document.activeElement?.matches?.('.pl input,.pl textarea,.pl select'))plRender()}
