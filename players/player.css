@@ -619,3 +619,17 @@ html{scrollbar-gutter:stable}.pv-hub.glass .hub-nav .nb{display:inline-block}#ba
 .pr-prof{position:relative;margin:-2.2mm auto 2.4mm;width:max-content;padding:1.3mm 7mm 1.5mm;gap:1.1mm;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M1 1H99L92 19H8Z' fill='%23fff' stroke='%235f5e63' stroke-width='1.4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
 .pr-prof b{font:9pt/1 'DH Eveleth',Arial,sans-serif;text-transform:uppercase;color:#3d3c40;margin-right:1.2mm}
 .pr-prof i{width:3.6mm;height:3.6mm;border:.4mm solid #5f5e63;box-sizing:border-box}.pr-prof i.on{background:#5f5e63;box-shadow:inset 0 0 0 .5mm #fff}
+/* scheda interattiva: riquadri puliti come nella stampa (bordo grigio aperto verso il bordo del foglio, banner bianco a punta) */
+.pl-official-sheet .pl-paper-columns{padding-right:0;gap:14px}
+.pl-official-sheet .pl-official-panel{border:1.5px solid #5f5e63;box-shadow:none;clip-path:none;background:#fff;overflow:visible;padding-top:30px;margin-top:16px}
+.pl-official-sheet .pl-paper-left>.pl-official-panel{border-left:0;border-radius:0 14px 14px 0}
+.pl-official-sheet .pl-paper-right>.pl-official-panel{border-right:0;border-radius:14px 0 0 14px}
+.pl-official-sheet .pl-paper-wide>.pl-official-panel{border:4px double #5f5e63;border-radius:12px;margin-top:16px}
+.pl-official-sheet .pl-paper-title{position:absolute;left:0;right:0;top:-17px;margin:0!important;min-height:0;pointer-events:none}
+.pl-official-sheet .pl-paper-title>*{pointer-events:auto}
+.pl-official-sheet .pl-paper-title:before,.pl-official-sheet .pl-paper-title:after,.pl-official-sheet .pl-weapons-panel>.pl-paper-title:after{display:none}
+.pl-official-sheet .pl-paper-title span{min-width:0;padding:7px 46px;font-size:18px;color:#3d3c40;filter:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M7 1H93L99 10L93 19H7L1 10Z' fill='%23fff' stroke='%235f5e63' stroke-width='1.5' vector-effect='non-scaling-stroke'/%3E%3Cpath d='M4.5 10 8.5 4.5H11L7 10 11 15.5H8.5ZM95.5 10 91.5 4.5H89L93 10 89 15.5H91.5Z' fill='%235f5e63'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.pl-official-sheet .pl-paper-title .btn.pl-title-add{right:14px}
+.pl-official-sheet .pl-proficiency{border:0;margin:-14px auto 18px;padding:6px 30px 8px;gap:5px;color:#3d3c40;font-size:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M1 1H99L92 19H8Z' fill='%23fff' stroke='%235f5e63' stroke-width='1.5' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.pl-official-sheet .pl-proficiency span{margin-right:4px}
+.pl-official-sheet .pl-proficiency i{border-color:#5f5e63}.pl-official-sheet .pl-proficiency i.on{background:#5f5e63}
