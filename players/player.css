@@ -683,3 +683,5 @@ body.eq-dragging [data-eq-slot]{outline:2px dashed color-mix(in srgb,var(--sheet
 .eqp-cell{position:relative;outline:.2mm dashed #b9b2c0;outline-offset:.5mm}.eqp-cell.empty{outline-color:#eee}
 .eqp-page footer{margin-top:auto;padding:0 0 7mm;font:7pt 'DH Overpass',Arial,sans-serif;color:#9a90a2}
 @media (max-width:760px){.eqp-body{flex-direction:column}.eqp-side{width:auto;max-height:45vh}}
+.eqp-kinds{display:flex;flex-wrap:wrap;gap:4px 12px;width:100%;font-size:12.5px;margin-bottom:4px}.eqp-kinds label{display:flex;align-items:center;gap:4px;cursor:pointer}
+.eqp-quick .btn span{opacity:.6;font-size:11px;margin-left:2px}
