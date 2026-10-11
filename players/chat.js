@@ -20,6 +20,7 @@ const chatVisible=id=>CHAT.open.includes(id)&&!CHAT.min[id]&&document.visibility
 const chatUnread=id=>(CHAT.msgs[id]||[]).filter(m=>m.from!==chatSide()&&m.at>(CHAT.seen[id]||0)).length;
 async function chatSend(id,text){text=String(text||'').trim().slice(0,1000);if(!text||!VIEW.tdb)return;const at=Date.now();
  try{if(!VIEW.canGM){const names=(PL.chars||[]).filter(c=>c.name).map(c=>c.name);await VIEW.tdb.doc('chat/'+id).set({name:names.join(', ')||'Giocatore',at})}
+  else await VIEW.tdb.doc('chat/'+id).set({name:CHAT.threads[id]?.name||'Giocatore',at});
   await VIEW.tdb.collection('chat/'+id+'/m').doc().set({from:chatSide(),text,at});CHAT.draft[id]='';CHAT.err=''}
  catch(e){CHAT.err='Messaggio non inviato: riprova.'}chatRender()}
 function chatShown(){return VIEW.mode==='gm'?VIEW.canGM:VIEW.mode==='player'}
@@ -37,7 +38,8 @@ function chatRender(){let el=document.getElementById('chat-dock');if(!el){el=doc
  el.querySelectorAll('.chat-list').forEach(l=>l.scrollTop=l.scrollHeight);
  if(act){const t=el.querySelector(`[data-chat-input="${CSS.escape(act)}"]`);if(t){t.focus();try{t.setSelectionRange(sel[0],sel[1])}catch(e){}}}}
 document.addEventListener('click',e=>{const b=e.target.closest?.('[data-chat]');if(!b)return;e.preventDefault();e.stopPropagation();const id=b.dataset.id,a=b.dataset.chat;
- if(a==='toggle'){if(!CHAT.open.includes(id)){CHAT.open.push(id);CHAT.min[id]=false}else CHAT.min[id]=!CHAT.min[id];if(VIEW.canGM&&CHAT.open.length>3)CHAT.open=CHAT.open.filter(x=>x===id||!CHAT.min[x]).slice(-3)}
+ if(a==='open-with'){if(!CHAT.on)chatInit();if(!CHAT.on){if(typeof toast==='function')toast('La chat non è disponibile qui.');return}if(!CHAT.threads[id])CHAT.threads[id]={name:b.dataset.name||'Giocatore',at:0};chatWatch(id);if(!CHAT.open.includes(id))CHAT.open.push(id);CHAT.min[id]=false;if(CHAT.open.length>3)CHAT.open=CHAT.open.filter(x=>x===id||!CHAT.min[x]).slice(-3)}
+ else if(a==='toggle'){if(!CHAT.open.includes(id)){CHAT.open.push(id);CHAT.min[id]=false}else CHAT.min[id]=!CHAT.min[id];if(VIEW.canGM&&CHAT.open.length>3)CHAT.open=CHAT.open.filter(x=>x===id||!CHAT.min[x]).slice(-3)}
  else if(a==='min')CHAT.min[id]=true;else if(a==='close'){CHAT.open=CHAT.open.filter(x=>x!==id)}
  if(chatVisible(id)){CHAT.seen[id]=Date.now();chatSeenSave()}chatRender();if(chatVisible(id))document.querySelector(`[data-chat-input="${CSS.escape(id)}"]`)?.focus()},true);
 document.addEventListener('input',e=>{const id=e.target.dataset?.chatInput;if(id!=null)CHAT.draft[id]=e.target.value});
