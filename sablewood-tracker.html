@@ -1605,6 +1605,51 @@ html{scrollbar-gutter:stable}.pv-hub.glass .hub-nav .nb{display:inline-block}#ba
 body.eq-dragging [data-eq-slot]{outline:2px dashed color-mix(in srgb,var(--sheet-accent,#6e57a5) 45%,transparent);outline-offset:3px;border-radius:12px;transition:outline-color .15s,background .15s}
 [data-eq-slot].eq-drop-on{outline:2px solid var(--sheet-accent,#6e57a5)!important;background:color-mix(in srgb,var(--sheet-accent,#6e57a5) 8%,transparent)}
 .pl-official-sheet .pl-paper-columns{grid-template-columns:minmax(0,44fr) minmax(0,56fr)}.pl-official-sheet .pl-paper-right,.pl-official-sheet .pl-paper-left{min-width:0}
+/* chat GM ↔ giocatori: linguette e popup in basso a destra */
+#chat-dock{position:fixed;right:12px;bottom:var(--chat-bottom,12px);z-index:260;display:flex;align-items:flex-end;gap:10px;pointer-events:none;font-family:var(--f-body,system-ui),sans-serif}
+#chat-dock>*{pointer-events:auto}
+.chat-tabs{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.chat-tab{display:flex;align-items:center;gap:8px;max-width:210px;padding:6px 12px 6px 6px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(24,20,30,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#f3eff7;font:600 13px/1.1 var(--f-body,system-ui),sans-serif;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.chat-tab i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#6e57a5;font-style:normal;font-weight:800;flex:none}
+.chat-tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-tab em{font-style:normal;background:#c0453b;color:#fff;border-radius:999px;padding:2px 7px;font-size:11px;font-weight:800}
+.chat-tab.on{background:rgba(110,87,165,.95)}.chat-tab.new{animation:chatPulse 1.6s ease-in-out 3}
+@keyframes chatPulse{50%{box-shadow:0 0 0 6px rgba(192,69,59,.35)}}
+.chat-pops{display:flex;gap:10px;align-items:flex-end}
+.chat-pop{width:300px;height:380px;display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:#fbf9fc;color:#2c2433;border:1px solid #cfc6d8;box-shadow:0 14px 40px rgba(0,0,0,.3);animation:chatIn .18s ease-out}
+@keyframes chatIn{from{opacity:0;transform:translateY(10px)}}
+.chat-pop header{display:flex;align-items:center;gap:6px;padding:9px 8px 9px 12px;background:#2c2433;color:#fff}
+.chat-pop header b{font:15px/1.1 var(--sheet-font,'DH Eveleth'),Georgia,serif;text-transform:uppercase;letter-spacing:.02em;flex:none;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-pop header span{flex:1;font-size:11px;opacity:.65}
+.chat-pop header button{border:0;background:rgba(255,255,255,.12);color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1}
+.chat-list{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:6px}
+.chat-msg{max-width:82%;align-self:flex-start;background:#ece6f1;border-radius:12px 12px 12px 4px;padding:6px 10px}
+.chat-msg.me{align-self:flex-end;background:#6e57a5;color:#fff;border-radius:12px 12px 4px 12px}
+.chat-msg p{margin:0;font-size:13.5px;line-height:1.35;white-space:pre-wrap;overflow-wrap:anywhere}.chat-msg small{display:block;font-size:10px;opacity:.6;margin-top:2px;text-align:right}
+.chat-empty{margin:auto;text-align:center;font-size:12.5px;color:#7a7180;padding:0 18px}
+.chat-err{margin:0;padding:4px 10px;font-size:12px;color:#a33}
+.chat-pop form{display:flex;gap:6px;padding:8px;border-top:1px solid #e3dbe7;background:#fff}
+.chat-pop textarea{flex:1;resize:none;border:1px solid #d6cddd;border-radius:10px;padding:6px 9px;font:13.5px/1.3 var(--f-body,system-ui),sans-serif;min-height:0}
+.chat-pop form button{border:0;border-radius:10px;background:#6e57a5;color:#fff;width:38px;cursor:pointer;font-size:15px}
+@media (max-width:640px){.chat-pop{width:calc(100vw - 24px);height:60vh}.chat-pops{position:fixed;left:12px;right:12px;bottom:calc(var(--chat-bottom,12px) + 52px)}}
+/* builder dei fogli di mini card */
+.eqp-body{flex:1;min-height:0;display:flex}
+.eqp-side{width:310px;flex:none;overflow:auto;background:#f6f3f8;color:#2c2433;padding:14px;display:flex;flex-direction:column;gap:14px;font:14px/1.3 var(--f-body,system-ui),sans-serif}
+.eqp-side small{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#7a7180;font-weight:700;margin-bottom:6px}
+.eqp-search{display:flex;flex-direction:column;gap:6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#7a7180;font-weight:700}.eqp-search input{font:14px var(--f-body,system-ui),sans-serif;padding:8px 10px;border:1px solid #d6cddd;border-radius:10px;text-transform:none;letter-spacing:0}
+.eqp-hits{list-style:none;margin:-6px 0 0;padding:0;border:1px solid #e3dbe7;border-radius:10px;background:#fff;overflow:hidden}.eqp-hits button{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;cursor:pointer;border-top:1px solid #f0ebf3}.eqp-hits li:first-child button{border:0}.eqp-hits button:hover{background:#f3eef7}.eqp-hits b{flex:1;font-weight:700}.eqp-hits small{margin:0;text-transform:none;letter-spacing:0;font-weight:500}.eqp-hits span{color:#6e57a5;font-weight:800}
+.eqp-quick{display:flex;flex-wrap:wrap;gap:6px}.eqp-quick small{width:100%;margin:0}.eqp-quick .btn{font-size:12px;padding:5px 10px}
+.eqp-row{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #e8e1ec}.eqp-row span{flex:1;min-width:0}.eqp-row b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.eqp-row span small{margin:0;text-transform:none;letter-spacing:0;font-weight:500}
+.eqp-row button{width:24px;height:24px;border-radius:50%;border:1px solid #cfc6d8;background:#fff;cursor:pointer;font-weight:800;color:#493d57}.eqp-row em{font-style:normal;font-weight:800;min-width:16px;text-align:center}
+.eqp-empty,.eqp-none{color:#7a7180;font-size:13px;margin:0}.eqp-none{color:#ddd;margin:auto}.eqp-clear{margin-top:10px;font-size:12px}
+.eqp-stage{flex-direction:column;align-items:center;gap:22px}
+.eqp-scale{transform-origin:0 0;flex:none}
+.eqp-page{width:210mm;height:297mm;box-sizing:border-box;background:#fff;padding:12mm 0 0;display:flex;flex-direction:column;align-items:center;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+.pl-print-capture .eqp-page{box-shadow:none}
+.eqp-grid{display:grid;grid-template-columns:repeat(4,41mm);grid-auto-rows:63mm;gap:2mm}
+.eqp-cell{position:relative;outline:.2mm dashed #b9b2c0;outline-offset:.5mm}.eqp-cell.empty{outline-color:#eee}
+.eqp-page footer{margin-top:auto;padding:0 0 7mm;font:7pt 'DH Overpass',Arial,sans-serif;color:#9a90a2}
+@media (max-width:760px){.eqp-body{flex-direction:column}.eqp-side{width:auto;max-height:45vh}}
 
 /* PLAYER_STYLE_END */
 /* RULES_STYLE_START */
@@ -5427,7 +5472,7 @@ function eqCard(e,mode='gallery'){const color={primary:'#926475',secondary:'#ae8
 function eqFiltered(picker=false){const c=picker?eqTarget():null;return EQ_CATALOG.filter(e=>!e.brawler&&(!EQ.query||(e.name+' '+e.feature).toLowerCase().includes(EQ.query.toLowerCase()))&&(EQ.kind==='all'||e.kind===EQ.kind||EQ.kind==='weapons'&&['primary','secondary'].includes(e.kind))&&(EQ.tier==='all'||String(e.tier)===EQ.tier)&&(EQ.magic==='all'||e.magic===(EQ.magic==='yes'))&&(EQ.book==='all'||e.book===EQ.book)&&(!picker||!EQ.start||((!e.campaign&&e.tier===1)||e.name==='Minor Health Potion'||e.name==='Minor Stamina Potion'))&&(!picker||!e.tier||e.tier<=plTier(c.level)))}
 function eqFilterHTML(){return `<div class="eq-search"><input data-eq-filter="query" aria-label="Cerca equipaggiamento" placeholder="Search name or keyword…" value="${esc(EQ.query)}"><select data-eq-filter="book" aria-label="Equipment book">${[['all','Both manuals'],['core','Core Rulebook'],['hf','Hope & Fear']].map(([v,l])=>`<option value="${v}" ${EQ.book===v?'selected':''}>${l}</option>`).join('')}</select></div><div class="eq-filters" aria-label="Equipment filters">${[['all','All'],['primary','Primary weapons'],['secondary','Secondary weapons'],['armor','Armor'],['consumable','Consumables'],['item','Items']].map(([v,l])=>eqBtn('filter',l,`data-field="kind" data-value="${v}" aria-pressed="${EQ.kind===v}"`,EQ.kind===v?'pri':'')).join('')}<span class="eq-filter-divider"></span>${[['all','Any tier'],['1','Tier 1'],['2','Tier 2'],['3','Tier 3'],['4','Tier 4']].map(([v,l])=>eqBtn('filter',l,`data-field="tier" data-value="${v}" aria-pressed="${EQ.tier===v}"`,EQ.tier===v?'pri':'')).join('')}${[['all','All damage types'],['yes','Magic'],['no','Physical / mundane']].map(([v,l])=>eqBtn('filter',l,`data-field="magic" data-value="${v}" aria-pressed="${EQ.magic===v}"`,EQ.magic===v?'pri':'')).join('')}</div>`}
 function eqGridHTML(picker=false){const list=eqFiltered(picker),pages=Math.max(1,Math.ceil(list.length/24));EQ.page=Math.min(EQ.page,pages-1);return `${eqFilterHTML()}<div class="eq-result-count">${list.length} items${picker?' · Tier compatibili con il personaggio':''}</div><div class="cg eq-grid">${list.slice(EQ.page*24,EQ.page*24+24).map(e=>eqCard(e,picker?'picker':'gallery')).join('')||'<div class="pl-empty">Nessun oggetto con questi filtri.</div>'}</div><div class="pl-nav">${eqBtn('page','←',`data-delta="-1" ${EQ.page===0?'disabled':''}`)}<span>${EQ.page+1} / ${pages}</span>${eqBtn('page','→',`data-delta="1" ${EQ.page===pages-1?'disabled':''}`)}</div>`}
-function renderEquipment(){return `<main class="pl eq-catalog"><header class="pl-head"><div><div class="pl-kicker">Core Rulebook + Hope & Fear</div><h1>Equipment</h1><p class="pl-note">Weapons, armor, items & consumables · ${EQ_CATALOG.filter(x=>!x.brawler).length} cards</p></div>${PL.chars.length?eqBtn('open-picker','＋ Add oggetto'):''}</header>${eqGridHTML()}${EQ.detail&&!PL.modal?eqDetailHTML(false):''}${plModal()}</main>`}
+function renderEquipment(){return `<main class="pl eq-catalog"><header class="pl-head"><div><div class="pl-kicker">Core Rulebook + Hope & Fear</div><h1>Equipment</h1><p class="pl-note">Weapons, armor, items & consumables · ${EQ_CATALOG.filter(x=>!x.brawler).length} cards</p></div><div class="pl-actions"><button type="button" class="btn" data-eqp="open" title="Fogli A4 di mini card da ritagliare">🖨 Stampa carte${typeof EQP!=='undefined'&&EQP.sel.length?' ('+EQP.sel.reduce((n,x)=>n+x.n,0)+')':''}</button>${PL.chars.length?eqBtn('open-picker','＋ Add oggetto'):''}</div></header>${eqGridHTML()}${EQ.detail&&!PL.modal?eqDetailHTML(false):''}${plModal()}</main>`}
 function eqTarget(){return EQ.draft?PL.draft:PL.chars.find(x=>x.id===EQ.character)||plCurrent()}
 function eqPicker(c,kind='all',draft=false){if(!c)throw Error('Apri o crea prima un personaggio.');eqEnsure(c);EQ.character=c.id;EQ.draft=draft;EQ.start=draft;EQ.kind=kind;EQ.query='';EQ.book='all';EQ.tier='all';EQ.magic='all';EQ.page=0;EQ.detail=null;EQ.owned=null;EQ.inventorySlot=null;PL.modal={kind:'gear-picker'};PL.error='';EQ.message='';}
 function eqPickerHTML(){const c=eqTarget();if(EQ.owned&&EQ.detail)return `<div class="eq-picker eq-owned-detail">${eqDetailHTML(true)}</div>`;return `<div class="eq-picker"><p class="pl-note">${esc(c.name||c.className)} · scegli le carte da aggiungere allo zaino. Puoi equipaggiare armi e armature direttamente.${EQ.start?' Starting equipment · Tier 1.':''}</p>${PL.error?`<p class="pl-error" role="alert">${esc(PL.error)}</p>`:''}${EQ.message?`<p class="eq-notice" role="status">${esc(EQ.message)}</p>`:''}${EQ.detail?eqDetailHTML(true):eqGridHTML(true)}</div>`}
@@ -5508,7 +5553,7 @@ function eqLbHTML(e){const pos=EQ_LB.list.indexOf(e.id),many=EQ_LB.list.length>1
   ${e.feature&&e.feature!=='—'?`<p class="lb-f2 eq-lb-feat">${eqFeatureHTML(e.feature)}</p>`:''}${e.description?`<p class="lb-f2">${esc(e.description)}</p>`:''}
   ${book?`<p class="lb-f2">${book}${e.page?` · p. ${e.page}`:''}</p>`:''}
   <p>${EQ_LB.ro?'':EQ_LB.uid[e.id]?`<button class="btn" data-eq="inspect-owned-full" data-uid="${esc(EQ_LB.uid[e.id])}">Azioni sull'oggetto</button>`:`<button class="btn" data-eq="detail-full" data-id="${esc(e.id)}">Dettagli e azioni</button>`}</p>
-  <p class="lb-f2 eq-lb-print">Anteprima di stampa · mini card 41 × 63 mm</p><p class="lb-pos">${many?`${pos+1} di ${EQ_LB.list.length} · ← → per scorrere · `:''}Esc per chiudere</p></aside></div>`}
+  <p class="lb-f2 eq-lb-print">Anteprima di stampa · mini card 41 × 63 mm</p><p><button class="btn" data-eqp="add-only" data-id="${esc(e.id)}">＋ Aggiungi alla stampa</button> <button class="btn" data-eqp="open">Fogli di stampa</button></p><p class="lb-pos">${many?`${pos+1} di ${EQ_LB.list.length} · ← → per scorrere · `:''}Esc per chiudere</p></aside></div>`}
 function eqLbFit(lb){const f=lb.querySelector('.eq-lb-f'),s=lb.querySelector('.eq-lb-scale');if(!f||!s)return;s.style.transform='none';eqPrintFit(s);const w=s.offsetWidth||300,h=s.offsetHeight||1,k=Math.min(f.clientWidth/w,f.clientHeight/h);s.style.transform=`translate(${(f.clientWidth-w*k)/2}px,${(f.clientHeight-h*k)/2}px) scale(${k})`}
 function eqLbShow(id,how,src){const e=eqItem(id);if(!e)return;let lb=document.getElementById('cd-lb');
  if(!lb){lb=document.createElement('div');lb.id='cd-lb';lb.className='lb';lb.setAttribute('role','dialog');lb.setAttribute('aria-modal','true');lb.setAttribute('aria-label','Carta ingrandita');document.body.appendChild(lb);document.body.classList.add('lb-on')}
@@ -5817,6 +5862,103 @@ async function plPrintPdf(c){const el=document.getElementById('pl-print'),msg=el
   if(msg)msg.textContent='PDF pronto.'}
  catch(e){if(msg)msg.textContent='Non sono riuscito a creare il PDF: riprova.'}
  finally{host.remove()}}
+
+/* Sussurri al GM: ogni giocatore ha una conversazione privata col master.
+   Database: chat/<idGiocatore> (nome, ultimo messaggio) e chat/<idGiocatore>/m/<id> (un documento per messaggio).
+   Regole: il prefisso chat lo legge e lo scrive solo il proprietario (il GM); chat/{self} lo scrive il giocatore,
+   così nessuno vede le conversazioni degli altri. Il GM ha in basso a destra una linguetta per giocatore e i popup
+   delle chat aperte; il giocatore ha un solo popup «Scrivi al GM». */
+const CHAT={on:false,me:'',threads:{},msgs:{},subs:new Set(),open:[],min:{},seen:{},draft:{},err:''};
+function chatSeenSave(){try{localStorage.setItem('dh-chat-seen:'+CHAT.me,JSON.stringify(CHAT.seen))}catch(e){}}
+function chatInit(){if(CHAT.on||!VIEW.tdb||!PL.account||PL.account==='browser'||PL.localOnly)return;CHAT.on=true;CHAT.me=PL.account;
+ try{CHAT.seen=JSON.parse(localStorage.getItem('dh-chat-seen:'+CHAT.me)||'{}')}catch(e){}
+ if(VIEW.canGM)VIEW.tdb.collection('chat').onSnapshot(s=>{for(const d of s.docs||[]){const v=d.data()||{};CHAT.threads[d.id]=v;chatWatch(d.id)}chatRender()},()=>{});
+ else{CHAT.threads[CHAT.me]={name:'Master'};chatWatch(CHAT.me)}
+ chatRender()}
+function chatWatch(id){if(CHAT.subs.has(id))return;CHAT.subs.add(id);
+ VIEW.tdb.collection('chat/'+id+'/m').orderBy('at').onSnapshot(s=>{const first=!(id in CHAT.msgs),before=(CHAT.msgs[id]||[]).length,list=(s.docs||[]).map(d=>d.data()).filter(m=>m&&typeof m.text==='string');CHAT.msgs[id]=list;
+  const last=list.at(-1);if(!first&&list.length>before&&last&&last.from!==chatSide()&&!chatVisible(id)){if(VIEW.canGM&&!CHAT.open.includes(id))CHAT.open.push(id),CHAT.min[id]=true;if(typeof toast==='function')toast((VIEW.canGM?chatName(id):'Il GM')+': '+last.text.slice(0,60))}
+  if(chatVisible(id)){CHAT.seen[id]=Date.now();chatSeenSave()}chatRender()},()=>{CHAT.err='Chat non disponibile';chatRender()})}
+const chatSide=()=>VIEW.canGM?'gm':'p';
+const chatName=id=>VIEW.canGM?(CHAT.threads[id]?.name||'Giocatore'):'Master';
+const chatVisible=id=>CHAT.open.includes(id)&&!CHAT.min[id]&&document.visibilityState!=='hidden';
+const chatUnread=id=>(CHAT.msgs[id]||[]).filter(m=>m.from!==chatSide()&&m.at>(CHAT.seen[id]||0)).length;
+async function chatSend(id,text){text=String(text||'').trim().slice(0,1000);if(!text||!VIEW.tdb)return;const at=Date.now();
+ try{if(!VIEW.canGM){const names=(PL.chars||[]).filter(c=>c.name).map(c=>c.name);await VIEW.tdb.doc('chat/'+id).set({name:names.join(', ')||'Giocatore',at})}
+  await VIEW.tdb.collection('chat/'+id+'/m').doc().set({from:chatSide(),text,at});CHAT.draft[id]='';CHAT.err=''}
+ catch(e){CHAT.err='Messaggio non inviato: riprova.'}chatRender()}
+function chatShown(){return VIEW.mode==='gm'?VIEW.canGM:VIEW.mode==='player'}
+function chatRender(){let el=document.getElementById('chat-dock');if(!el){el=document.createElement('div');el.id='chat-dock';document.body.appendChild(el)}
+ if(!CHAT.on||!chatShown()){el.innerHTML='';return}
+ const task=document.querySelector('#tbl:not([hidden]) .tbl-task');el.style.setProperty('--chat-bottom',(task?task.offsetHeight+10:12)+'px');
+ const ids=VIEW.canGM?Object.keys(CHAT.threads).sort((a,b)=>(CHAT.threads[b].at||0)-(CHAT.threads[a].at||0)):[CHAT.me];
+ const fmt=t=>new Date(t).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+ const pop=id=>{const ms=CHAT.msgs[id]||[];return `<section class="chat-pop" data-id="${esc(id)}" role="dialog" aria-label="Chat con ${esc(chatName(id))}"><header><b>${esc(chatName(id))}</b><span>${VIEW.canGM?'privata':'solo tu e il GM'}</span><button type="button" data-chat="min" data-id="${esc(id)}" aria-label="Riduci">–</button>${VIEW.canGM?`<button type="button" data-chat="close" data-id="${esc(id)}" aria-label="Chiudi">×</button>`:''}</header>
+  <div class="chat-list">${ms.length?ms.map(m=>`<div class="chat-msg ${m.from===chatSide()?'me':''}"><p>${esc(m.text)}</p><small>${fmt(m.at)}</small></div>`).join(''):`<p class="chat-empty">${VIEW.canGM?'Nessun messaggio.':'Scrivi al GM: azioni segrete, domande, idee. Lo vede solo lui.'}</p>`}</div>
+  ${CHAT.err?`<p class="chat-err">${esc(CHAT.err)}</p>`:''}<form data-chat-form="${esc(id)}"><textarea rows="2" placeholder="Scrivi… (Invio per mandare)" aria-label="Messaggio" data-chat-input="${esc(id)}">${esc(CHAT.draft[id]||'')}</textarea><button type="submit" aria-label="Invia">➤</button></form></section>`};
+ const act=document.activeElement?.dataset?.chatInput,sel=act?[document.activeElement.selectionStart,document.activeElement.selectionEnd]:null;
+ const tabs=ids.map(id=>{const n=chatUnread(id),on=CHAT.open.includes(id)&&!CHAT.min[id];return `<button type="button" class="chat-tab ${on?'on':''} ${n?'new':''}" data-chat="toggle" data-id="${esc(id)}"><i aria-hidden="true">${VIEW.canGM?esc((chatName(id)[0]||'?').toUpperCase()):'✉'}</i><span>${VIEW.canGM?esc(chatName(id)):'Scrivi al GM'}</span>${n?`<em>${n}</em>`:''}</button>`}).join('');
+ el.innerHTML=`<div class="chat-pops">${CHAT.open.filter(id=>!CHAT.min[id]).map(pop).join('')}</div>${ids.length?`<div class="chat-tabs">${tabs}</div>`:''}`;
+ el.querySelectorAll('.chat-list').forEach(l=>l.scrollTop=l.scrollHeight);
+ if(act){const t=el.querySelector(`[data-chat-input="${CSS.escape(act)}"]`);if(t){t.focus();try{t.setSelectionRange(sel[0],sel[1])}catch(e){}}}}
+document.addEventListener('click',e=>{const b=e.target.closest?.('[data-chat]');if(!b)return;e.preventDefault();e.stopPropagation();const id=b.dataset.id,a=b.dataset.chat;
+ if(a==='toggle'){if(!CHAT.open.includes(id)){CHAT.open.push(id);CHAT.min[id]=false}else CHAT.min[id]=!CHAT.min[id];if(VIEW.canGM&&CHAT.open.length>3)CHAT.open=CHAT.open.filter(x=>x===id||!CHAT.min[x]).slice(-3)}
+ else if(a==='min')CHAT.min[id]=true;else if(a==='close'){CHAT.open=CHAT.open.filter(x=>x!==id)}
+ if(chatVisible(id)){CHAT.seen[id]=Date.now();chatSeenSave()}chatRender();if(chatVisible(id))document.querySelector(`[data-chat-input="${CSS.escape(id)}"]`)?.focus()},true);
+document.addEventListener('input',e=>{const id=e.target.dataset?.chatInput;if(id!=null)CHAT.draft[id]=e.target.value});
+document.addEventListener('keydown',e=>{const id=e.target.dataset?.chatInput;if(id==null)return;e.stopPropagation();if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatSend(id,e.target.value)}},true);
+document.addEventListener('submit',e=>{const id=e.target.dataset?.chatForm;if(id==null)return;e.preventDefault();chatSend(id,e.target.querySelector('textarea')?.value)});
+document.addEventListener('visibilitychange',()=>{for(const id of CHAT.open)if(chatVisible(id))CHAT.seen[id]=Date.now();chatSeenSave();chatRender()});
+// la chat parte appena il tavolo conosce l'account; si ridisegna quando cambia la modalità o la barra del tavolo
+setInterval(()=>{if(!CHAT.on)chatInit();else{const want=chatShown(),has=!!document.querySelector('#chat-dock .chat-tabs');if(want!==has)chatRender();const task=document.querySelector('#tbl:not([hidden]) .tbl-task'),b=(task?task.offsetHeight+10:12)+'px',el=document.getElementById('chat-dock');if(el&&el.style.getPropertyValue('--chat-bottom')!==b)el.style.setProperty('--chat-bottom',b)}},1000);
+
+/* Stampa delle mini card equipaggiamento: si sceglie cosa stampare (singole carte, l'equipaggiamento di un
+   personaggio o del party) e si ottengono fogli A4 con 16 mini card 41×63 mm (4×4), con i segni di taglio.
+   La selezione resta nel browser; anteprima a schermo e PDF con html2canvas + jsPDF come la scheda. */
+const EQP={open:false,q:'',sel:[]};
+try{EQP.sel=JSON.parse(localStorage.getItem('dh-eq-print')||'[]').filter(x=>eqItem(x.id))}catch(e){}
+const eqpSave=()=>{try{localStorage.setItem('dh-eq-print',JSON.stringify(EQP.sel))}catch(e){}};
+const EQP_PER=16;
+function eqpAdd(id,n=1){if(!eqItem(id))return;const x=EQP.sel.find(s=>s.id===id);if(x)x.n=Math.min(20,x.n+n);else EQP.sel.push({id,n:Math.max(1,n)});eqpSave()}
+function eqpCards(){return EQP.sel.flatMap(s=>Array.from({length:s.n},()=>s.id))}
+// equipaggiamento di un personaggio: armi e armatura attive, inventory weapon e oggetti con carta
+function eqpFromChar(c){eqEnsure(c);const ids=new Set();for(const k of ['primary','secondary','armorId'])if(c[k])ids.add(c[k]);for(const x of c.items||[]){const e=eqItem(x.gear);if(e&&!e.brawler&&!/^supply-/.test(e.id))eqpAdd(e.id,Math.min(x.qty||1,5)),ids.delete(e.id)}for(const id of ids)eqpAdd(id)}
+function eqpPages(){const cards=eqpCards(),pages=[];for(let i=0;i<cards.length;i+=EQP_PER)pages.push(cards.slice(i,i+EQP_PER));return pages}
+function eqpPageHTML(ids,k,total){return `<div class="eqp-page"><div class="eqp-grid">${Array.from({length:EQP_PER},(_,i)=>ids[i]?`<div class="eqp-cell">${eqPrintCard(eqItem(ids[i]))}</div>`:'<div class="eqp-cell empty"></div>').join('')}</div><footer>Mini card 41 × 63 mm · ritaglia lungo i segni · foglio ${k+1} di ${total}</footer></div>`}
+function eqpHTML(){const q=cfold(EQP.q.trim()),hits=q?EQ_CATALOG.filter(e=>!e.brawler&&cfold(e.name).includes(q)).slice(0,12):[],pages=eqpPages(),n=eqpCards().length;
+ const chars=(typeof PL!=='undefined'?PL.chars:[]).filter(c=>c.className);
+ return `<div class="pl-print-bar"><b>Stampa mini card</b><span class="pl-print-msg" role="status">${n} carte · ${pages.length} ${pages.length===1?'foglio':'fogli'} A4</span><button type="button" class="btn pri" data-eqp="pdf" ${n?'':'disabled'}>Scarica PDF</button><button type="button" class="btn" data-eqp="close">Chiudi</button></div>
+ <div class="eqp-body"><aside class="eqp-side">
+  <label class="eqp-search">Aggiungi una carta<input type="search" data-eqp-q value="${esc(EQP.q)}" placeholder="Cerca per nome…"></label>
+  ${hits.length?`<ul class="eqp-hits">${hits.map(e=>`<li><button type="button" data-eqp="add" data-id="${esc(e.id)}"><b>${esc(e.name)}</b><small>${esc(eqLabel(e.kind))}${e.tier?' · T'+e.tier:''}</small><span>＋</span></button></li>`).join('')}</ul>`:''}
+  ${chars.length?`<div class="eqp-quick"><small>Equipaggiamento di un personaggio</small>${chars.map(c=>`<button type="button" class="btn" data-eqp="char" data-id="${esc(c.id)}">＋ ${esc(c.name||'Senza nome')}</button>`).join('')}${chars.length>1?`<button type="button" class="btn" data-eqp="party">＋ Tutti i personaggi</button>`:''}</div>`:''}
+  <div class="eqp-sel"><small>Da stampare</small>${EQP.sel.length?EQP.sel.map(s=>{const e=eqItem(s.id);return `<div class="eqp-row"><span><b>${esc(e.name)}</b><small>${esc(eqLabel(e.kind))}</small></span><button type="button" data-eqp="less" data-id="${esc(s.id)}" aria-label="Una copia in meno">−</button><em>${s.n}</em><button type="button" data-eqp="more" data-id="${esc(s.id)}" aria-label="Una copia in più">+</button></div>`}).join(''):'<p class="eqp-empty">Nessuna carta. Cerca qui sopra, aggiungi l\'equipaggiamento di un personaggio, oppure apri una carta e premi «Aggiungi alla stampa».</p>'}${EQP.sel.length?'<button type="button" class="btn eqp-clear" data-eqp="clear">Svuota</button>':''}</div>
+ </aside><div class="pl-print-stage eqp-stage">${pages.length?pages.map((p,k)=>`<div class="eqp-scale">${eqpPageHTML(p,k,pages.length)}</div>`).join(''):'<p class="eqp-none">L\'anteprima dei fogli compare qui.</p>'}</div></div>`}
+function eqpRender(){let el=document.getElementById('eq-print-ov');if(!EQP.open){if(el)el.remove();document.body.classList.remove('pl-print-on');return}
+ if(!el){el=document.createElement('div');el.id='eq-print-ov';el.className='pl-print-ov';document.body.appendChild(el)}
+ const st=el.querySelector('.eqp-stage')?.scrollTop||0,focus=document.activeElement?.matches?.('[data-eqp-q]');el.innerHTML=eqpHTML();document.body.classList.add('pl-print-on');
+ const stage=el.querySelector('.eqp-stage');if(stage)stage.scrollTop=st;if(focus){const i=el.querySelector('[data-eqp-q]');i.focus();i.setSelectionRange(i.value.length,i.value.length)}
+ (document.fonts?.ready||Promise.resolve()).then(()=>{el.querySelectorAll('.eqp-cell').forEach(c=>eqPrintFit(c));eqpScale()})}
+function eqpScale(){const el=document.getElementById('eq-print-ov'),stage=el?.querySelector('.eqp-stage');if(!stage)return;stage.querySelectorAll('.eqp-scale').forEach(s=>{const pg=s.firstElementChild;s.style.transform='none';const k=Math.min((stage.clientWidth-40)/pg.offsetWidth,1.2);s.style.transform=`scale(${k})`;s.style.width=pg.offsetWidth*k+'px';s.style.height=pg.offsetHeight*k+'px'})}
+async function eqpPdf(){const el=document.getElementById('eq-print-ov'),msg=el?.querySelector('.pl-print-msg'),pages=eqpPages();if(!pages.length)return;if(msg)msg.textContent='Creo il PDF…';
+ const host=document.createElement('div');host.className='pl-print-capture';document.body.appendChild(host);
+ try{await Promise.all([loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')]);await (document.fonts?.ready||Promise.resolve());
+  const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
+  for(let k=0;k<pages.length;k++){host.innerHTML=eqpPageHTML(pages[k],k,pages.length);await Promise.all([...host.querySelectorAll('img')].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));host.querySelectorAll('.eqp-cell').forEach(c=>eqPrintFit(c));if(msg)msg.textContent=`Creo il PDF… foglio ${k+1} di ${pages.length}`;
+   const cv=await html2canvas(host.querySelector('.eqp-page'),{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false});if(k)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',.9),'JPEG',0,0,210,297,undefined,'FAST')}
+  const blob=pdf.output('blob'),name='Mini card equipaggiamento.pdf',dl=window.claude?.use?await window.claude.use('downloads').catch(()=>null):null;
+  if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(e?.code!=='declined')throw e}}else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
+  if(msg)msg.textContent='PDF pronto.'}
+ catch(e){if(msg)msg.textContent='Non sono riuscito a creare il PDF: riprova.'}finally{host.remove()}}
+document.addEventListener('click',e=>{const b=e.target.closest?.('[data-eqp]');if(!b)return;e.preventDefault();e.stopPropagation();const a=b.dataset.eqp,id=b.dataset.id;
+ if(a==='open'){EQP.open=true;if(id)eqpAdd(id)}else if(a==='close')EQP.open=false;else if(a==='add'){eqpAdd(id);EQP.q=''}
+ else if(a==='more')eqpAdd(id);else if(a==='less'){const x=EQP.sel.find(s=>s.id===id);if(x&&--x.n<1)EQP.sel=EQP.sel.filter(s=>s!==x);eqpSave()}
+ else if(a==='clear'){EQP.sel=[];eqpSave()}else if(a==='char'){const c=PL.chars.find(x=>x.id===id);if(c)eqpFromChar(c)}else if(a==='party')PL.chars.filter(c=>c.className).forEach(eqpFromChar);
+ else if(a==='add-only'){eqpAdd(id);if(typeof toast==='function')toast(eqItem(id)?.name+' aggiunta alla stampa');b.textContent='✓ Aggiunta alla stampa';return}
+ else if(a==='pdf'){eqpPdf();return}
+ eqpRender()},true);
+document.addEventListener('input',e=>{if(!e.target.matches?.('[data-eqp-q]'))return;EQP.q=e.target.value;eqpRender()});
+addEventListener('resize',()=>{if(EQP.open)eqpScale()});
 
 /* Player characters. No dependencies: this source is embedded into the standalone artifact. */
 const PL_TRAITS=['Agility','Strength','Finesse','Instinct','Presence','Knowledge'];
