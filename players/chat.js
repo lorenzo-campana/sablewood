@@ -21,22 +21,31 @@ const chatUnread=id=>(CHAT.msgs[id]||[]).filter(m=>m.from!==chatSide()&&m.at>(CH
 async function chatSend(id,text){text=String(text||'').trim().slice(0,1000);if(!text||!VIEW.tdb)return;const at=Date.now();
  try{if(!VIEW.canGM){const names=(PL.chars||[]).filter(c=>c.name).map(c=>c.name);await VIEW.tdb.doc('chat/'+id).set({name:names.join(', ')||'Giocatore',at})}
   else await VIEW.tdb.doc('chat/'+id).set({name:CHAT.threads[id]?.name||'Giocatore',at});
-  await VIEW.tdb.collection('chat/'+id+'/m').doc().set({from:chatSide(),text,at});CHAT.draft[id]='';CHAT.err=''}
+  await VIEW.tdb.collection('chat/'+id+'/m').doc().set({from:chatSide(),text,at});CHAT.draft[id]='';CHAT.err='';const ta=document.querySelector(`[data-chat-input="${CSS.escape(id)}"]`);if(ta)ta.value=''}
  catch(e){CHAT.err='Messaggio non inviato: riprova.'}chatRender()}
 function chatShown(){return VIEW.mode==='gm'?VIEW.canGM:VIEW.mode==='player'}
-function chatRender(){let el=document.getElementById('chat-dock');if(!el){el=document.createElement('div');el.id='chat-dock';document.body.appendChild(el)}
- if(!CHAT.on||!chatShown()){el.innerHTML='';return}
+// aggiorna solo le parti cambiate: i popup aperti restano gli stessi elementi (niente animazione ripetuta, il testo che stai scrivendo non si tocca)
+function chatRender(){let el=document.getElementById('chat-dock');if(!el){el=document.createElement('div');el.id='chat-dock';el.innerHTML='<div class="chat-pops"></div><div class="chat-tabs"></div>';document.body.appendChild(el)}
+ const popsEl=el.querySelector('.chat-pops'),tabsEl=el.querySelector('.chat-tabs');
+ if(!CHAT.on||!chatShown()){popsEl.innerHTML='';tabsEl.innerHTML='';tabsEl.hidden=true;return}
  const task=document.querySelector('#tbl:not([hidden]) .tbl-task');el.style.setProperty('--chat-bottom',(task?task.offsetHeight+10:12)+'px');
  const ids=VIEW.canGM?Object.keys(CHAT.threads).sort((a,b)=>(CHAT.threads[b].at||0)-(CHAT.threads[a].at||0)):[CHAT.me];
  const fmt=t=>new Date(t).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
- const pop=id=>{const ms=CHAT.msgs[id]||[];return `<section class="chat-pop" data-id="${esc(id)}" role="dialog" aria-label="Chat con ${esc(chatName(id))}"><header><b>${esc(chatName(id))}</b><span>${VIEW.canGM?'privata':'solo tu e il GM'}</span><button type="button" data-chat="min" data-id="${esc(id)}" aria-label="Riduci">–</button>${VIEW.canGM?`<button type="button" data-chat="close" data-id="${esc(id)}" aria-label="Chiudi">×</button>`:''}</header>
-  <div class="chat-list">${ms.length?ms.map(m=>`<div class="chat-msg ${m.from===chatSide()?'me':''}"><p>${esc(m.text)}</p><small>${fmt(m.at)}</small></div>`).join(''):`<p class="chat-empty">${VIEW.canGM?'Nessun messaggio.':'Scrivi al GM: azioni segrete, domande, idee. Lo vede solo lui.'}</p>`}</div>
-  ${CHAT.err?`<p class="chat-err">${esc(CHAT.err)}</p>`:''}<form data-chat-form="${esc(id)}"><textarea rows="2" placeholder="Scrivi… (Invio per mandare)" aria-label="Messaggio" data-chat-input="${esc(id)}">${esc(CHAT.draft[id]||'')}</textarea><button type="submit" aria-label="Invia">➤</button></form></section>`};
- const act=document.activeElement?.dataset?.chatInput,sel=act?[document.activeElement.selectionStart,document.activeElement.selectionEnd]:null;
+ const want=CHAT.open.filter(id=>!CHAT.min[id]);
+ for(const sec of [...popsEl.children])if(!want.includes(sec.dataset.id))sec.remove();
+ for(const id of want){let sec=[...popsEl.children].find(x=>x.dataset.id===id);
+  if(!sec){sec=document.createElement('section');sec.className='chat-pop';sec.dataset.id=id;sec.setAttribute('role','dialog');
+   sec.innerHTML=`<header><b></b><span>${VIEW.canGM?'privata':'solo tu e il GM'}</span><button type="button" data-chat="min" data-id="${esc(id)}" aria-label="Riduci">–</button>${VIEW.canGM?`<button type="button" data-chat="close" data-id="${esc(id)}" aria-label="Chiudi">×</button>`:''}</header><div class="chat-list"></div><p class="chat-err" hidden></p><form data-chat-form="${esc(id)}"><textarea rows="2" placeholder="Scrivi… (Invio per mandare)" aria-label="Messaggio" data-chat-input="${esc(id)}"></textarea><button type="submit" aria-label="Invia">➤</button></form>`;
+   sec.querySelector('textarea').value=CHAT.draft[id]||'';popsEl.appendChild(sec)}
+  const name=chatName(id);if(sec.querySelector('header b').textContent!==name){sec.querySelector('header b').textContent=name;sec.setAttribute('aria-label','Chat con '+name)}
+  const ms=CHAT.msgs[id]||[],sig=ms.length+':'+(ms.at(-1)?.at||0),list=sec.querySelector('.chat-list');
+  if(list.dataset.sig!==sig){const atBottom=list.scrollHeight-list.scrollTop-list.clientHeight<40||!list.dataset.sig;list.dataset.sig=sig;
+   list.innerHTML=ms.length?ms.map(m=>`<div class="chat-msg ${m.from===chatSide()?'me':''}"><p>${esc(m.text)}</p><small>${fmt(m.at)}</small></div>`).join(''):`<p class="chat-empty">${VIEW.canGM?'Nessun messaggio.':'Scrivi al GM: azioni segrete, domande, idee. Lo vede solo lui.'}</p>`;
+   if(atBottom)list.scrollTop=list.scrollHeight}
+  const err=sec.querySelector('.chat-err');err.hidden=!CHAT.err;err.textContent=CHAT.err||'';
+  const ta=sec.querySelector('textarea');if(document.activeElement!==ta&&ta.value!==(CHAT.draft[id]||''))ta.value=CHAT.draft[id]||''}
  const tabs=ids.map(id=>{const n=chatUnread(id),on=CHAT.open.includes(id)&&!CHAT.min[id];return `<button type="button" class="chat-tab ${on?'on':''} ${n?'new':''}" data-chat="toggle" data-id="${esc(id)}"><i aria-hidden="true">${VIEW.canGM?esc((chatName(id)[0]||'?').toUpperCase()):'✉'}</i><span>${VIEW.canGM?esc(chatName(id)):'Scrivi al GM'}</span>${n?`<em>${n}</em>`:''}</button>`}).join('');
- el.innerHTML=`<div class="chat-pops">${CHAT.open.filter(id=>!CHAT.min[id]).map(pop).join('')}</div>${ids.length?`<div class="chat-tabs">${tabs}</div>`:''}`;
- el.querySelectorAll('.chat-list').forEach(l=>l.scrollTop=l.scrollHeight);
- if(act){const t=el.querySelector(`[data-chat-input="${CSS.escape(act)}"]`);if(t){t.focus();try{t.setSelectionRange(sel[0],sel[1])}catch(e){}}}}
+ tabsEl.hidden=!ids.length;if(tabsEl.dataset.html!==tabs){tabsEl.dataset.html=tabs;tabsEl.innerHTML=tabs}}
 document.addEventListener('click',e=>{const b=e.target.closest?.('[data-chat]');if(!b)return;e.preventDefault();e.stopPropagation();const id=b.dataset.id,a=b.dataset.chat;
  if(a==='open-with'){if(!CHAT.on)chatInit();if(!CHAT.on){if(typeof toast==='function')toast('La chat non è disponibile qui.');return}if(!CHAT.threads[id])CHAT.threads[id]={name:b.dataset.name||'Giocatore',at:0};chatWatch(id);if(!CHAT.open.includes(id))CHAT.open.push(id);CHAT.min[id]=false;if(CHAT.open.length>3)CHAT.open=CHAT.open.filter(x=>x===id||!CHAT.min[x]).slice(-3)}
  else if(a==='toggle'){if(!CHAT.open.includes(id)){CHAT.open.push(id);CHAT.min[id]=false}else CHAT.min[id]=!CHAT.min[id];if(VIEW.canGM&&CHAT.open.length>3)CHAT.open=CHAT.open.filter(x=>x===id||!CHAT.min[x]).slice(-3)}
@@ -47,4 +56,4 @@ document.addEventListener('keydown',e=>{const id=e.target.dataset?.chatInput;if(
 document.addEventListener('submit',e=>{const id=e.target.dataset?.chatForm;if(id==null)return;e.preventDefault();chatSend(id,e.target.querySelector('textarea')?.value)});
 document.addEventListener('visibilitychange',()=>{for(const id of CHAT.open)if(chatVisible(id))CHAT.seen[id]=Date.now();chatSeenSave();chatRender()});
 // la chat parte appena il tavolo conosce l'account; si ridisegna quando cambia la modalità o la barra del tavolo
-setInterval(()=>{if(!CHAT.on)chatInit();else{const want=chatShown(),has=!!document.querySelector('#chat-dock .chat-tabs');if(want!==has)chatRender();const task=document.querySelector('#tbl:not([hidden]) .tbl-task'),b=(task?task.offsetHeight+10:12)+'px',el=document.getElementById('chat-dock');if(el&&el.style.getPropertyValue('--chat-bottom')!==b)el.style.setProperty('--chat-bottom',b)}},1000);
+setInterval(()=>{if(!CHAT.on)chatInit();else{const want=chatShown(),has=!!document.querySelector('#chat-dock .chat-tabs:not([hidden])');if(want!==has)chatRender();const task=document.querySelector('#tbl:not([hidden]) .tbl-task'),b=(task?task.offsetHeight+10:12)+'px',el=document.getElementById('chat-dock');if(el&&el.style.getPropertyValue('--chat-bottom')!==b)el.style.setProperty('--chat-bottom',b)}},1000);
