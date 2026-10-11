@@ -37,7 +37,7 @@ async function eqpPdf(){const el=document.getElementById('eq-print-ov'),msg=el?.
  try{await Promise.all([loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')]);await (document.fonts?.ready||Promise.resolve());
   const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
   for(let k=0;k<pages.length;k++){host.innerHTML=eqpPageHTML(pages[k],k,pages.length);await Promise.all([...host.querySelectorAll('img')].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));host.querySelectorAll('.eqp-cell').forEach(c=>eqPrintFit(c));if(msg)msg.textContent=`Creo il PDF… foglio ${k+1} di ${pages.length}`;
-   const cv=await html2canvas(host.querySelector('.eqp-page'),{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false});if(k)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',.9),'JPEG',0,0,210,297,undefined,'FAST')}
+   plPdfSafeColors(host);const cv=await html2canvas(host.querySelector('.eqp-page'),{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false});if(k)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',.9),'JPEG',0,0,210,297,undefined,'FAST')}
   const blob=pdf.output('blob'),name='Mini card equipaggiamento.pdf',dl=window.claude?.use?await window.claude.use('downloads').catch(()=>null):null;
   if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(e?.code!=='declined')throw e}}else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
   if(msg)msg.textContent='PDF pronto.'}

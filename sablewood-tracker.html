@@ -5823,6 +5823,13 @@ function plPrintFrame(panel){if(!panel)return;panel.querySelector(':scope>.pr-fr
  // il lato aperto va verso il bordo del foglio: per la colonna destra a destra, per quella sinistra a sinistra
  const path=(o)=>{const x0=right?o:-1,x1=right?w+1:w-o,t=o,b=h-o;return right?`M${x1} ${t}H${x0+c}L${x0} ${t+c}V${b-c}L${x0+c} ${b}H${x1}`:`M${x0} ${t}H${x1-c}L${x1} ${t+c}V${b-c}L${x1-c} ${b}H${x0}`};
  panel.insertAdjacentHTML('afterbegin',`<svg class="pr-frame" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${path(.5)}" fill="none" stroke="#5f5e63" stroke-width="${.35*mm}"/><path d="${path(g)}" fill="none" stroke="#5f5e63" stroke-width="${.3*mm}"/></svg>`)}
+// html2canvas 1.4 non legge i colori moderni (color-mix → color(srgb …), oklch…): prima della cattura
+// li riscrive in rgba() come stile inline, misurandoli su un canvas di 1 pixel
+const PL_PDF_PROPS=['color','background-color','border-top-color','border-right-color','border-bottom-color','border-left-color','outline-color','text-decoration-color','fill','stroke','box-shadow','background-image'];
+function plPdfSafeColors(root){const cv=document.createElement('canvas');cv.width=cv.height=1;const ctx=cv.getContext('2d',{willReadFrequently:true}),memo={};
+ const rgba=c=>{if(c in memo)return memo[c];ctx.clearRect(0,0,1,1);ctx.fillStyle='#000';ctx.fillStyle=c;ctx.fillRect(0,0,1,1);const d=ctx.getImageData(0,0,1,1).data;return memo[c]=`rgba(${d[0]},${d[1]},${d[2]},${+(d[3]/255).toFixed(3)})`};
+ const fix=v=>v.replace(/(?:color|oklch|oklab|lch|lab|color-mix)\((?:[^()]|\([^()]*\))*\)/g,rgba);
+ for(const el of [root,...root.querySelectorAll('*')]){const cs=getComputedStyle(el);for(const k of PL_PDF_PROPS){const v=cs.getPropertyValue(k);if(v&&/(?:color|oklch|oklab|lch|lab)\(/.test(v))el.style.setProperty(k,fix(v),'important')}}}
 function plPrintSlots(n){return `<span class="pr-slots12">${Array.from({length:12},(_,i)=>`<i class="${i<n?'':'x'}"></i>`).join('')}</span>`}
 function plPrintSheet(c){const k=plClass(c),st=plStats(c),cls=[[c.className,k?.features]];if(c.multiclass)cls.push([c.multiclass.className,PLAYER_RULES.classes[c.multiclass.className]?.features]);
  const accent=CDOM[k.domains[0]]?.c||'#6e57a5',hopeT=String(k.hope||''),hi=hopeT.indexOf(':');
@@ -5859,7 +5866,7 @@ function plPrintClose(){const el=document.getElementById('pl-print');if(el){el.i
 async function plPrintPdf(c){const el=document.getElementById('pl-print'),msg=el?.querySelector('.pl-print-msg');if(msg)msg.textContent='Creo il PDF…';
  const host=document.createElement('div');host.className='pl-print-capture';host.innerHTML=plPrintSheet(c);document.body.appendChild(host);
  try{await Promise.all([loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')]);await (document.fonts?.ready||Promise.resolve());plPrintFit(host);
-  const cv=await html2canvas(host.querySelector('.pr-page'),{scale:3,backgroundColor:'#ffffff',logging:false}),pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
+  plPdfSafeColors(host);const cv=await html2canvas(host.querySelector('.pr-page'),{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false}),pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
   pdf.addImage(cv.toDataURL('image/jpeg',.92),'JPEG',0,0,210,297,undefined,'FAST');const blob=pdf.output('blob'),name=(c.name||'personaggio').replace(/[\\/:*?"<>|]/g,'-')+' - scheda.pdf';
   const dl=window.claude?.use?await window.claude.use('downloads').catch(()=>null):null;
   if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(e?.code!=='declined')throw e}}
@@ -5967,7 +5974,7 @@ async function eqpPdf(){const el=document.getElementById('eq-print-ov'),msg=el?.
  try{await Promise.all([loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')]);await (document.fonts?.ready||Promise.resolve());
   const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
   for(let k=0;k<pages.length;k++){host.innerHTML=eqpPageHTML(pages[k],k,pages.length);await Promise.all([...host.querySelectorAll('img')].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));host.querySelectorAll('.eqp-cell').forEach(c=>eqPrintFit(c));if(msg)msg.textContent=`Creo il PDF… foglio ${k+1} di ${pages.length}`;
-   const cv=await html2canvas(host.querySelector('.eqp-page'),{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false});if(k)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',.9),'JPEG',0,0,210,297,undefined,'FAST')}
+   plPdfSafeColors(host);const cv=await html2canvas(host.querySelector('.eqp-page'),{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false});if(k)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',.9),'JPEG',0,0,210,297,undefined,'FAST')}
   const blob=pdf.output('blob'),name='Mini card equipaggiamento.pdf',dl=window.claude?.use?await window.claude.use('downloads').catch(()=>null):null;
   if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(e?.code!=='declined')throw e}}else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
   if(msg)msg.textContent='PDF pronto.'}
