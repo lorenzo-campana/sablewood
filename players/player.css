@@ -637,3 +637,4 @@ html{scrollbar-gutter:stable}.pv-hub.glass .hub-nav .nb{display:inline-block}#ba
 [data-eq-uid][draggable="true"]{cursor:grab}[data-eq-uid][draggable="true"]:active{cursor:grabbing}
 body.eq-dragging [data-eq-slot]{outline:2px dashed color-mix(in srgb,var(--sheet-accent,#6e57a5) 45%,transparent);outline-offset:3px;border-radius:12px;transition:outline-color .15s,background .15s}
 [data-eq-slot].eq-drop-on{outline:2px solid var(--sheet-accent,#6e57a5)!important;background:color-mix(in srgb,var(--sheet-accent,#6e57a5) 8%,transparent)}
+.pl-official-sheet .pl-paper-columns{grid-template-columns:minmax(0,44fr) minmax(0,56fr)}.pl-official-sheet .pl-paper-right,.pl-official-sheet .pl-paper-left{min-width:0}
