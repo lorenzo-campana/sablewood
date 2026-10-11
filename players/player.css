@@ -633,3 +633,7 @@ html{scrollbar-gutter:stable}.pv-hub.glass .hub-nav .nb{display:inline-block}#ba
 .pl-official-sheet .pl-proficiency{border:0;margin:-14px auto 18px;padding:6px 30px 8px;gap:5px;color:#3d3c40;font-size:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath d='M1 1H99L92 19H8Z' fill='%23fff' stroke='%235f5e63' stroke-width='1.5' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") center/100% 100% no-repeat}
 .pl-official-sheet .pl-proficiency span{margin-right:4px}
 .pl-official-sheet .pl-proficiency i{border-color:#5f5e63}.pl-official-sheet .pl-proficiency i.on{background:#5f5e63}
+/* trascinamento delle carte equipaggiamento */
+[data-eq-uid][draggable="true"]{cursor:grab}[data-eq-uid][draggable="true"]:active{cursor:grabbing}
+body.eq-dragging [data-eq-slot]{outline:2px dashed color-mix(in srgb,var(--sheet-accent,#6e57a5) 45%,transparent);outline-offset:3px;border-radius:12px;transition:outline-color .15s,background .15s}
+[data-eq-slot].eq-drop-on{outline:2px solid var(--sheet-accent,#6e57a5)!important;background:color-mix(in srgb,var(--sheet-accent,#6e57a5) 8%,transparent)}
