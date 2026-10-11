@@ -15,7 +15,7 @@ function eqpPages(){const cards=eqpCards(),pages=[];for(let i=0;i<cards.length;i
 function eqpPageHTML(ids,k,total){return `<div class="eqp-page"><div class="eqp-grid">${Array.from({length:EQP_PER},(_,i)=>ids[i]?`<div class="eqp-cell">${eqPrintCard(eqItem(ids[i]))}</div>`:'<div class="eqp-cell empty"></div>').join('')}</div><footer>Mini card 41 × 63 mm · ritaglia lungo i segni · foglio ${k+1} di ${total}</footer></div>`}
 function eqpHTML(){const q=cfold(EQP.q.trim()),hits=q?EQ_CATALOG.filter(e=>!e.brawler&&cfold(e.name).includes(q)).slice(0,12):[],pages=eqpPages(),n=eqpCards().length;
  const chars=(typeof PL!=='undefined'?PL.chars:[]).filter(c=>c.className);
- return `<div class="pl-print-bar"><b>Stampa mini card</b><span class="pl-print-msg" role="status">${n} carte · ${pages.length} ${pages.length===1?'foglio':'fogli'} A4</span><button type="button" class="btn pri" data-eqp="pdf" ${n?'':'disabled'}>Scarica PDF</button><button type="button" class="btn" data-eqp="close">Chiudi</button></div>
+ return `<div class="pl-print-bar"><b>Stampa mini card</b><span class="pl-print-msg" role="status">${n} carte · ${pages.length} ${pages.length===1?'foglio':'fogli'} A4</span><button type="button" class="btn pri" data-eqp="pdf" ${n?'':'disabled'}>Scarica PDF</button><button type="button" class="btn" data-eqp="print" ${n?'':'disabled'}>Stampa</button><button type="button" class="btn" data-eqp="close">Chiudi</button></div>
  <div class="eqp-body"><aside class="eqp-side">
   <label class="eqp-search">Aggiungi una carta<input type="search" data-eqp-q value="${esc(EQP.q)}" placeholder="Cerca per nome…"></label>
   ${hits.length?`<ul class="eqp-hits">${hits.map(e=>`<li><button type="button" data-eqp="add" data-id="${esc(e.id)}"><b>${esc(e.name)}</b><small>${esc(eqLabel(e.kind))}${e.tier?' · T'+e.tier:''}</small><span>＋</span></button></li>`).join('')}</ul>`:''}
@@ -38,10 +38,8 @@ async function eqpPdf(){const el=document.getElementById('eq-print-ov'),msg=el?.
   const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
   for(let k=0;k<pages.length;k++){host.innerHTML=eqpPageHTML(pages[k],k,pages.length);await Promise.all([...host.querySelectorAll('img')].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));host.querySelectorAll('.eqp-cell').forEach(c=>eqPrintFit(c));if(msg)msg.textContent=`Creo il PDF… foglio ${k+1} di ${pages.length}`;
    plPdfSafeColors(host);const cv=await html2canvas(host.querySelector('.eqp-page'),{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false});if(k)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',.9),'JPEG',0,0,210,297,undefined,'FAST')}
-  const blob=pdf.output('blob'),name='Mini card equipaggiamento.pdf',dl=window.claude?.use?await window.claude.use('downloads').catch(()=>null):null;
-  if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(e?.code!=='declined')throw e}}else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
-  if(msg)msg.textContent='PDF pronto.'}
- catch(e){if(msg)msg.textContent='Non sono riuscito a creare il PDF: riprova.'}finally{host.remove()}}
+  await plPdfSave(pdf.output('blob'),'Mini card equipaggiamento.pdf',msg)}
+ catch(e){if(msg)msg.textContent='Non sono riuscito a creare il PDF: usa «Stampa» e scegli «Salva come PDF».'}finally{host.remove()}}
 document.addEventListener('click',e=>{const b=e.target.closest?.('[data-eqp]');if(!b)return;e.preventDefault();e.stopPropagation();const a=b.dataset.eqp,id=b.dataset.id;
  if(a==='open'){EQP.open=true;if(id)eqpAdd(id)}else if(a==='close')EQP.open=false;else if(a==='add'){eqpAdd(id);EQP.q=''}
  else if(a==='more')eqpAdd(id);else if(a==='less'){const x=EQP.sel.find(s=>s.id===id);if(x&&--x.n<1)EQP.sel=EQP.sel.filter(s=>s!==x);eqpSave()}
@@ -50,6 +48,7 @@ document.addEventListener('click',e=>{const b=e.target.closest?.('[data-eqp]');i
  else if(a==='tier'){eqpTier(+b.dataset.t).forEach(e=>{if(!EQP.sel.some(x=>x.id===e.id))eqpAdd(e.id)})}
  else if(a==='kind-all'){EQ_CATALOG.filter(e=>e.kind===b.dataset.k&&!e.brawler).forEach(e=>{if(!EQP.sel.some(x=>x.id===e.id))eqpAdd(e.id)})}
  else if(a==='pdf'){eqpPdf();return}
+ else if(a==='print'){const pages=eqpPages();plPrintPages(pages.map((p,k)=>eqpPageHTML(p,k,pages.length)).join(''),el=>el.querySelectorAll('.eqp-cell').forEach(c=>eqPrintFit(c)));return}
  eqpRender()},true);
 document.addEventListener('change',e=>{const k=e.target.dataset?.eqpKind;if(k){EQP.kinds=e.target.checked?[...new Set([...EQP.kinds,k])]:EQP.kinds.filter(x=>x!==k);eqpRender()}else if(e.target.matches?.('[data-eqp-camp]')){EQP.camp=e.target.checked;eqpRender()}});
 document.addEventListener('input',e=>{if(!e.target.matches?.('[data-eqp-q]'))return;EQP.q=e.target.value;eqpRender()});

@@ -1645,7 +1645,7 @@ body.eq-dragging [data-eq-slot]{outline:2px dashed color-mix(in srgb,var(--sheet
 .eqp-row{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #e8e1ec}.eqp-row span{flex:1;min-width:0}.eqp-row b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.eqp-row span small{margin:0;text-transform:none;letter-spacing:0;font-weight:500}
 .eqp-row button{width:24px;height:24px;border-radius:50%;border:1px solid #cfc6d8;background:#fff;cursor:pointer;font-weight:800;color:#493d57}.eqp-row em{font-style:normal;font-weight:800;min-width:16px;text-align:center}
 .eqp-empty,.eqp-none{color:#7a7180;font-size:13px;margin:0}.eqp-none{color:#ddd;margin:auto}.eqp-clear{margin-top:10px;font-size:12px}
-.eqp-stage{flex-direction:column;align-items:center;gap:22px}
+.eqp-stage{flex-direction:column;align-items:center;justify-content:flex-start;gap:22px}
 .eqp-scale{transform-origin:0 0;flex:none}
 .eqp-page{width:210mm;height:297mm;box-sizing:border-box;background:#fff;padding:12mm 0 0;display:flex;flex-direction:column;align-items:center;box-shadow:0 10px 40px rgba(0,0,0,.45)}
 .pl-print-capture .eqp-page{box-shadow:none}
@@ -1655,6 +1655,11 @@ body.eq-dragging [data-eq-slot]{outline:2px dashed color-mix(in srgb,var(--sheet
 @media (max-width:760px){.eqp-body{flex-direction:column}.eqp-side{width:auto;max-height:45vh}}
 .eqp-kinds{display:flex;flex-wrap:wrap;gap:4px 12px;width:100%;font-size:12.5px;margin-bottom:4px}.eqp-kinds label{display:flex;align-items:center;gap:4px;cursor:pointer}
 .eqp-quick .btn span{opacity:.6;font-size:11px;margin-left:2px}
+
+/* stampa diretta dei fogli: fuori schermo finché non si stampa, poi solo i fogli A4 */
+#pl-print-only{position:fixed;left:-10000px;top:0}
+@media print{@page{size:A4;margin:0}body.pl-printing>*:not(#pl-print-only){display:none!important}body.pl-printing{background:#fff!important;overflow:visible!important}#pl-print-only{position:static}#pl-print-only *{-webkit-print-color-adjust:exact;print-color-adjust:exact}#pl-print-only .eqp-page,#pl-print-only .pr-page{box-shadow:none!important;margin:0!important;height:296mm;overflow:hidden;break-after:page}#pl-print-only>:last-child{break-after:auto}}
+.pl-print-bar .btn:not(.pri){background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.35)}.pl-print-bar .btn:not(.pri):hover{background:rgba(255,255,255,.2)}
 
 /* PLAYER_STYLE_END */
 /* RULES_STYLE_START */
@@ -5830,6 +5835,19 @@ function plPdfSafeColors(root){const cv=document.createElement('canvas');cv.widt
  const rgba=c=>{if(c in memo)return memo[c];ctx.clearRect(0,0,1,1);ctx.fillStyle='#000';ctx.fillStyle=c;ctx.fillRect(0,0,1,1);const d=ctx.getImageData(0,0,1,1).data;return memo[c]=`rgba(${d[0]},${d[1]},${d[2]},${+(d[3]/255).toFixed(3)})`};
  const fix=v=>v.replace(/(?:color|oklch|oklab|lch|lab|color-mix)\((?:[^()]|\([^()]*\))*\)/g,rgba);
  for(const el of [root,...root.querySelectorAll('*')]){const cs=getComputedStyle(el);for(const k of PL_PDF_PROPS){const v=cs.getPropertyValue(k);if(v&&/(?:color|oklch|oklab|lch|lab)\(/.test(v))el.style.setProperty(k,fix(v),'important')}}}
+// consegna del PDF: claude.ai chiede conferma del salvataggio; dove non si può scaricare resta «Stampa» → Salva come PDF
+async function plPdfSave(blob,name,msg){const say=t=>{if(msg)msg.textContent=t};
+ const dl=window.claude?.use?await window.claude.use('downloads').catch(()=>null):null;
+ if(dl){say('Conferma il salvataggio nella finestra di claude.ai…');
+  try{await dl.save({filename:name,data:blob});say('PDF salvato.')}
+  catch(e){say(e?.code==='declined'?'Salvataggio annullato.':`Il download non è riuscito${e?.code?' ('+e.code+')':''}: usa «Stampa» e scegli «Salva come PDF».`)}return}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
+ say('PDF pronto. Se il download non parte, usa «Stampa» e scegli «Salva come PDF».')}
+// stampa diretta dei fogli A4 (anche per salvare in PDF dal dialogo di stampa)
+async function plPrintPages(html,fit){document.getElementById('pl-print-only')?.remove();const el=document.createElement('div');el.id='pl-print-only';el.innerHTML=html;document.body.appendChild(el);document.body.classList.add('pl-printing');
+ await (document.fonts?.ready||Promise.resolve());await Promise.all([...el.querySelectorAll('img')].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));if(fit)fit(el);
+ const done=()=>{document.body.classList.remove('pl-printing');el.remove();removeEventListener('afterprint',done)};addEventListener('afterprint',done);
+ try{window.print()}catch(e){done()}}
 function plPrintSlots(n){return `<span class="pr-slots12">${Array.from({length:12},(_,i)=>`<i class="${i<n?'':'x'}"></i>`).join('')}</span>`}
 function plPrintSheet(c){const k=plClass(c),st=plStats(c),cls=[[c.className,k?.features]];if(c.multiclass)cls.push([c.multiclass.className,PLAYER_RULES.classes[c.multiclass.className]?.features]);
  const accent=CDOM[k.domains[0]]?.c||'#6e57a5',hopeT=String(k.hope||''),hi=hopeT.indexOf(':');
@@ -5859,7 +5877,7 @@ function plPrintSheet(c){const k=plClass(c),st=plStats(c),cls=[[c.className,k?.f
 // il testo delle feature si rimpicciolisce finché la pagina sta in un A4
 function plPrintFit(root){const page=root.querySelector('.pr-page'),f=root.querySelector('.pr-feats-in');if(!page||!f)return;let pt=9;f.style.fontSize=pt+'pt';while((f.scrollHeight>f.clientHeight+1||page.scrollHeight>page.clientHeight+1)&&pt>5.4){pt-=.2;f.style.fontSize=pt+'pt'}plPrintFrame(f.closest('.pr-panel'))}
 function plPrintOpen(c){let el=document.getElementById('pl-print');if(!el){el=document.createElement('div');el.id='pl-print';el.className='pl-print-ov';document.body.appendChild(el)}
- el.innerHTML=`<div class="pl-print-bar"><b>Anteprima di stampa · A4</b><span class="pl-print-msg" role="status"></span><button type="button" class="btn pri" data-pl="print-pdf">Scarica PDF</button><button type="button" class="btn" data-pl="print-close">Chiudi</button></div><div class="pl-print-stage"><div class="pl-print-scale">${plPrintSheet(c)}</div></div>`;
+ el.innerHTML=`<div class="pl-print-bar"><b>Anteprima di stampa · A4</b><span class="pl-print-msg" role="status"></span><button type="button" class="btn pri" data-pl="print-pdf">Scarica PDF</button><button type="button" class="btn" data-pl="print-print">Stampa</button><button type="button" class="btn" data-pl="print-close">Chiudi</button></div><div class="pl-print-stage"><div class="pl-print-scale">${plPrintSheet(c)}</div></div>`;
  el.hidden=false;document.body.classList.add('pl-print-on');(document.fonts?.ready||Promise.resolve()).then(()=>{plPrintFit(el);plPrintScale()})}
 function plPrintScale(){const el=document.getElementById('pl-print'),st=el?.querySelector('.pl-print-stage'),sc=el?.querySelector('.pl-print-scale'),pg=sc?.querySelector('.pr-page');if(!pg)return;sc.style.transform='none';const k=Math.min((st.clientWidth-32)/pg.offsetWidth,1.6);sc.style.transform=`scale(${k})`;sc.style.height=pg.offsetHeight*k+'px';sc.style.width=pg.offsetWidth*k+'px'}
 function plPrintClose(){const el=document.getElementById('pl-print');if(el){el.innerHTML='';el.hidden=true}document.body.classList.remove('pl-print-on')}
@@ -5867,12 +5885,8 @@ async function plPrintPdf(c){const el=document.getElementById('pl-print'),msg=el
  const host=document.createElement('div');host.className='pl-print-capture';host.innerHTML=plPrintSheet(c);document.body.appendChild(host);
  try{await Promise.all([loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')]);await (document.fonts?.ready||Promise.resolve());plPrintFit(host);
   plPdfSafeColors(host);const cv=await html2canvas(host.querySelector('.pr-page'),{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false}),pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
-  pdf.addImage(cv.toDataURL('image/jpeg',.92),'JPEG',0,0,210,297,undefined,'FAST');const blob=pdf.output('blob'),name=(c.name||'personaggio').replace(/[\\/:*?"<>|]/g,'-')+' - scheda.pdf';
-  const dl=window.claude?.use?await window.claude.use('downloads').catch(()=>null):null;
-  if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(e?.code!=='declined')throw e}}
-  else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
-  if(msg)msg.textContent='PDF pronto.'}
- catch(e){if(msg)msg.textContent='Non sono riuscito a creare il PDF: riprova.'}
+  pdf.addImage(cv.toDataURL('image/jpeg',.92),'JPEG',0,0,210,297,undefined,'FAST');await plPdfSave(pdf.output('blob'),(c.name||'personaggio').replace(/[\\/:*?"<>|]/g,'-')+' - scheda.pdf',msg)}
+ catch(e){if(msg)msg.textContent='Non sono riuscito a creare il PDF: usa «Stampa» e scegli «Salva come PDF».'}
  finally{host.remove()}}
 
 /* Sussurri al GM: ogni giocatore ha una conversazione privata col master.
@@ -5952,7 +5966,7 @@ function eqpPages(){const cards=eqpCards(),pages=[];for(let i=0;i<cards.length;i
 function eqpPageHTML(ids,k,total){return `<div class="eqp-page"><div class="eqp-grid">${Array.from({length:EQP_PER},(_,i)=>ids[i]?`<div class="eqp-cell">${eqPrintCard(eqItem(ids[i]))}</div>`:'<div class="eqp-cell empty"></div>').join('')}</div><footer>Mini card 41 × 63 mm · ritaglia lungo i segni · foglio ${k+1} di ${total}</footer></div>`}
 function eqpHTML(){const q=cfold(EQP.q.trim()),hits=q?EQ_CATALOG.filter(e=>!e.brawler&&cfold(e.name).includes(q)).slice(0,12):[],pages=eqpPages(),n=eqpCards().length;
  const chars=(typeof PL!=='undefined'?PL.chars:[]).filter(c=>c.className);
- return `<div class="pl-print-bar"><b>Stampa mini card</b><span class="pl-print-msg" role="status">${n} carte · ${pages.length} ${pages.length===1?'foglio':'fogli'} A4</span><button type="button" class="btn pri" data-eqp="pdf" ${n?'':'disabled'}>Scarica PDF</button><button type="button" class="btn" data-eqp="close">Chiudi</button></div>
+ return `<div class="pl-print-bar"><b>Stampa mini card</b><span class="pl-print-msg" role="status">${n} carte · ${pages.length} ${pages.length===1?'foglio':'fogli'} A4</span><button type="button" class="btn pri" data-eqp="pdf" ${n?'':'disabled'}>Scarica PDF</button><button type="button" class="btn" data-eqp="print" ${n?'':'disabled'}>Stampa</button><button type="button" class="btn" data-eqp="close">Chiudi</button></div>
  <div class="eqp-body"><aside class="eqp-side">
   <label class="eqp-search">Aggiungi una carta<input type="search" data-eqp-q value="${esc(EQP.q)}" placeholder="Cerca per nome…"></label>
   ${hits.length?`<ul class="eqp-hits">${hits.map(e=>`<li><button type="button" data-eqp="add" data-id="${esc(e.id)}"><b>${esc(e.name)}</b><small>${esc(eqLabel(e.kind))}${e.tier?' · T'+e.tier:''}</small><span>＋</span></button></li>`).join('')}</ul>`:''}
@@ -5975,10 +5989,8 @@ async function eqpPdf(){const el=document.getElementById('eq-print-ov'),msg=el?.
   const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
   for(let k=0;k<pages.length;k++){host.innerHTML=eqpPageHTML(pages[k],k,pages.length);await Promise.all([...host.querySelectorAll('img')].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));host.querySelectorAll('.eqp-cell').forEach(c=>eqPrintFit(c));if(msg)msg.textContent=`Creo il PDF… foglio ${k+1} di ${pages.length}`;
    plPdfSafeColors(host);const cv=await html2canvas(host.querySelector('.eqp-page'),{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false});if(k)pdf.addPage();pdf.addImage(cv.toDataURL('image/jpeg',.9),'JPEG',0,0,210,297,undefined,'FAST')}
-  const blob=pdf.output('blob'),name='Mini card equipaggiamento.pdf',dl=window.claude?.use?await window.claude.use('downloads').catch(()=>null):null;
-  if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(e?.code!=='declined')throw e}}else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
-  if(msg)msg.textContent='PDF pronto.'}
- catch(e){if(msg)msg.textContent='Non sono riuscito a creare il PDF: riprova.'}finally{host.remove()}}
+  await plPdfSave(pdf.output('blob'),'Mini card equipaggiamento.pdf',msg)}
+ catch(e){if(msg)msg.textContent='Non sono riuscito a creare il PDF: usa «Stampa» e scegli «Salva come PDF».'}finally{host.remove()}}
 document.addEventListener('click',e=>{const b=e.target.closest?.('[data-eqp]');if(!b)return;e.preventDefault();e.stopPropagation();const a=b.dataset.eqp,id=b.dataset.id;
  if(a==='open'){EQP.open=true;if(id)eqpAdd(id)}else if(a==='close')EQP.open=false;else if(a==='add'){eqpAdd(id);EQP.q=''}
  else if(a==='more')eqpAdd(id);else if(a==='less'){const x=EQP.sel.find(s=>s.id===id);if(x&&--x.n<1)EQP.sel=EQP.sel.filter(s=>s!==x);eqpSave()}
@@ -5987,6 +5999,7 @@ document.addEventListener('click',e=>{const b=e.target.closest?.('[data-eqp]');i
  else if(a==='tier'){eqpTier(+b.dataset.t).forEach(e=>{if(!EQP.sel.some(x=>x.id===e.id))eqpAdd(e.id)})}
  else if(a==='kind-all'){EQ_CATALOG.filter(e=>e.kind===b.dataset.k&&!e.brawler).forEach(e=>{if(!EQP.sel.some(x=>x.id===e.id))eqpAdd(e.id)})}
  else if(a==='pdf'){eqpPdf();return}
+ else if(a==='print'){const pages=eqpPages();plPrintPages(pages.map((p,k)=>eqpPageHTML(p,k,pages.length)).join(''),el=>el.querySelectorAll('.eqp-cell').forEach(c=>eqPrintFit(c)));return}
  eqpRender()},true);
 document.addEventListener('change',e=>{const k=e.target.dataset?.eqpKind;if(k){EQP.kinds=e.target.checked?[...new Set([...EQP.kinds,k])]:EQP.kinds.filter(x=>x!==k);eqpRender()}else if(e.target.matches?.('[data-eqp-camp]')){EQP.camp=e.target.checked;eqpRender()}});
 document.addEventListener('input',e=>{if(!e.target.matches?.('[data-eqp-q]'))return;EQP.q=e.target.value;eqpRender()});
@@ -6352,6 +6365,7 @@ async function plAction(a,o){const c=plCurrent();PL.error='';switch(a){
  case'print-open':plPrintOpen(c);return;
  case'print-close':plPrintClose();return;
  case'print-pdf':await plPrintPdf(c);return;
+ case'print-print':await plPrintPages(plPrintSheet(c),plPrintFit);return;
  case'cfx':plClassFxAction(c,o);plSave(c);break;
  case'cardfx':{const w=plCurrent();w.cardFx=w.cardFx||{};w.cardFx[o.k]=!w.cardFx[o.k];plSave(w);break;}
  case'cardfx-pick':{const w=plCurrent();w.cardFx=w.cardFx||{};const cur=w.cardFx[o.k]||[],max=+o.max||2;w.cardFx[o.k]=cur.includes(o.v)?cur.filter(x=>x!==o.v):[...cur,o.v].slice(-max);plSave(w);break;}

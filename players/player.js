@@ -358,6 +358,7 @@ async function plAction(a,o){const c=plCurrent();PL.error='';switch(a){
  case'print-open':plPrintOpen(c);return;
  case'print-close':plPrintClose();return;
  case'print-pdf':await plPrintPdf(c);return;
+ case'print-print':await plPrintPages(plPrintSheet(c),plPrintFit);return;
  case'cfx':plClassFxAction(c,o);plSave(c);break;
  case'cardfx':{const w=plCurrent();w.cardFx=w.cardFx||{};w.cardFx[o.k]=!w.cardFx[o.k];plSave(w);break;}
  case'cardfx-pick':{const w=plCurrent();w.cardFx=w.cardFx||{};const cur=w.cardFx[o.k]||[],max=+o.max||2;w.cardFx[o.k]=cur.includes(o.v)?cur.filter(x=>x!==o.v):[...cur,o.v].slice(-max);plSave(w);break;}

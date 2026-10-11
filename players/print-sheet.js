@@ -16,6 +16,19 @@ function plPdfSafeColors(root){const cv=document.createElement('canvas');cv.widt
  const rgba=c=>{if(c in memo)return memo[c];ctx.clearRect(0,0,1,1);ctx.fillStyle='#000';ctx.fillStyle=c;ctx.fillRect(0,0,1,1);const d=ctx.getImageData(0,0,1,1).data;return memo[c]=`rgba(${d[0]},${d[1]},${d[2]},${+(d[3]/255).toFixed(3)})`};
  const fix=v=>v.replace(/(?:color|oklch|oklab|lch|lab|color-mix)\((?:[^()]|\([^()]*\))*\)/g,rgba);
  for(const el of [root,...root.querySelectorAll('*')]){const cs=getComputedStyle(el);for(const k of PL_PDF_PROPS){const v=cs.getPropertyValue(k);if(v&&/(?:color|oklch|oklab|lch|lab)\(/.test(v))el.style.setProperty(k,fix(v),'important')}}}
+// consegna del PDF: claude.ai chiede conferma del salvataggio; dove non si può scaricare resta «Stampa» → Salva come PDF
+async function plPdfSave(blob,name,msg){const say=t=>{if(msg)msg.textContent=t};
+ const dl=window.claude?.use?await window.claude.use('downloads').catch(()=>null):null;
+ if(dl){say('Conferma il salvataggio nella finestra di claude.ai…');
+  try{await dl.save({filename:name,data:blob});say('PDF salvato.')}
+  catch(e){say(e?.code==='declined'?'Salvataggio annullato.':`Il download non è riuscito${e?.code?' ('+e.code+')':''}: usa «Stampa» e scegli «Salva come PDF».`)}return}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
+ say('PDF pronto. Se il download non parte, usa «Stampa» e scegli «Salva come PDF».')}
+// stampa diretta dei fogli A4 (anche per salvare in PDF dal dialogo di stampa)
+async function plPrintPages(html,fit){document.getElementById('pl-print-only')?.remove();const el=document.createElement('div');el.id='pl-print-only';el.innerHTML=html;document.body.appendChild(el);document.body.classList.add('pl-printing');
+ await (document.fonts?.ready||Promise.resolve());await Promise.all([...el.querySelectorAll('img')].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));if(fit)fit(el);
+ const done=()=>{document.body.classList.remove('pl-printing');el.remove();removeEventListener('afterprint',done)};addEventListener('afterprint',done);
+ try{window.print()}catch(e){done()}}
 function plPrintSlots(n){return `<span class="pr-slots12">${Array.from({length:12},(_,i)=>`<i class="${i<n?'':'x'}"></i>`).join('')}</span>`}
 function plPrintSheet(c){const k=plClass(c),st=plStats(c),cls=[[c.className,k?.features]];if(c.multiclass)cls.push([c.multiclass.className,PLAYER_RULES.classes[c.multiclass.className]?.features]);
  const accent=CDOM[k.domains[0]]?.c||'#6e57a5',hopeT=String(k.hope||''),hi=hopeT.indexOf(':');
@@ -45,7 +58,7 @@ function plPrintSheet(c){const k=plClass(c),st=plStats(c),cls=[[c.className,k?.f
 // il testo delle feature si rimpicciolisce finché la pagina sta in un A4
 function plPrintFit(root){const page=root.querySelector('.pr-page'),f=root.querySelector('.pr-feats-in');if(!page||!f)return;let pt=9;f.style.fontSize=pt+'pt';while((f.scrollHeight>f.clientHeight+1||page.scrollHeight>page.clientHeight+1)&&pt>5.4){pt-=.2;f.style.fontSize=pt+'pt'}plPrintFrame(f.closest('.pr-panel'))}
 function plPrintOpen(c){let el=document.getElementById('pl-print');if(!el){el=document.createElement('div');el.id='pl-print';el.className='pl-print-ov';document.body.appendChild(el)}
- el.innerHTML=`<div class="pl-print-bar"><b>Anteprima di stampa · A4</b><span class="pl-print-msg" role="status"></span><button type="button" class="btn pri" data-pl="print-pdf">Scarica PDF</button><button type="button" class="btn" data-pl="print-close">Chiudi</button></div><div class="pl-print-stage"><div class="pl-print-scale">${plPrintSheet(c)}</div></div>`;
+ el.innerHTML=`<div class="pl-print-bar"><b>Anteprima di stampa · A4</b><span class="pl-print-msg" role="status"></span><button type="button" class="btn pri" data-pl="print-pdf">Scarica PDF</button><button type="button" class="btn" data-pl="print-print">Stampa</button><button type="button" class="btn" data-pl="print-close">Chiudi</button></div><div class="pl-print-stage"><div class="pl-print-scale">${plPrintSheet(c)}</div></div>`;
  el.hidden=false;document.body.classList.add('pl-print-on');(document.fonts?.ready||Promise.resolve()).then(()=>{plPrintFit(el);plPrintScale()})}
 function plPrintScale(){const el=document.getElementById('pl-print'),st=el?.querySelector('.pl-print-stage'),sc=el?.querySelector('.pl-print-scale'),pg=sc?.querySelector('.pr-page');if(!pg)return;sc.style.transform='none';const k=Math.min((st.clientWidth-32)/pg.offsetWidth,1.6);sc.style.transform=`scale(${k})`;sc.style.height=pg.offsetHeight*k+'px';sc.style.width=pg.offsetWidth*k+'px'}
 function plPrintClose(){const el=document.getElementById('pl-print');if(el){el.innerHTML='';el.hidden=true}document.body.classList.remove('pl-print-on')}
@@ -53,10 +66,6 @@ async function plPrintPdf(c){const el=document.getElementById('pl-print'),msg=el
  const host=document.createElement('div');host.className='pl-print-capture';host.innerHTML=plPrintSheet(c);document.body.appendChild(host);
  try{await Promise.all([loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')]);await (document.fonts?.ready||Promise.resolve());plPrintFit(host);
   plPdfSafeColors(host);const cv=await html2canvas(host.querySelector('.pr-page'),{scale:3,useCORS:true,backgroundColor:'#ffffff',logging:false}),pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
-  pdf.addImage(cv.toDataURL('image/jpeg',.92),'JPEG',0,0,210,297,undefined,'FAST');const blob=pdf.output('blob'),name=(c.name||'personaggio').replace(/[\\/:*?"<>|]/g,'-')+' - scheda.pdf';
-  const dl=window.claude?.use?await window.claude.use('downloads').catch(()=>null):null;
-  if(dl){try{await dl.save({filename:name,data:blob})}catch(e){if(e?.code!=='declined')throw e}}
-  else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
-  if(msg)msg.textContent='PDF pronto.'}
- catch(e){if(msg)msg.textContent='Non sono riuscito a creare il PDF: riprova.'}
+  pdf.addImage(cv.toDataURL('image/jpeg',.92),'JPEG',0,0,210,297,undefined,'FAST');await plPdfSave(pdf.output('blob'),(c.name||'personaggio').replace(/[\\/:*?"<>|]/g,'-')+' - scheda.pdf',msg)}
+ catch(e){if(msg)msg.textContent='Non sono riuscito a creare il PDF: usa «Stampa» e scegli «Salva come PDF».'}
  finally{host.remove()}}
