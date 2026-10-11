@@ -714,3 +714,10 @@ body.eq-dragging [data-eq-slot]{outline:2px dashed color-mix(in srgb,var(--sheet
 }
 /* tablet in verticale: nella scheda avversario l'illustrazione va sopra e il testo prende tutta la larghezza */
 @media (min-width:761px) and (max-width:900px){.bv-modal-content{grid-template-columns:1fr}.bv-art{position:relative;height:300px;min-height:300px;padding:20px 20px 50px;border-right:0!important;border-bottom:1px solid var(--line)}.bv-art img{max-height:220px;max-width:90%}.bv-art-ring{width:240px}.bv-art figcaption{bottom:12px}}
+/* barra in alto sempre su una riga: «Riprendi» compatto, nome della campagna solo se c'è spazio */
+.bar-r{flex:none;flex-wrap:nowrap;white-space:nowrap}.brand span{white-space:nowrap}
+.hub-resume{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;max-width:300px;padding-left:10px}.hub-resume svg{width:13px;height:13px;flex:none}
+.hub-resume em{font-style:normal;opacity:.75;overflow:hidden;text-overflow:ellipsis;min-width:0}.hub-resume em:before{content:'· '}
+@media (max-width:1499px){.hub-resume em{display:none}}
+@media (min-width:601px) and (max-width:1199px){.hub-nav .nb{display:none}.hub-nav button{padding:6px 9px;gap:5px}}
+@media (min-width:1061px) and (max-width:1199px){.brand span{display:none}}
