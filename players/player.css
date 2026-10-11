@@ -699,3 +699,18 @@ body.eq-dragging [data-eq-slot]{outline:2px dashed color-mix(in srgb,var(--sheet
 .eq-print-in .eq-art{position:relative;width:100%;overflow:hidden}.eq-print-in .eq-art img{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;object-fit:cover}
 /* l'animazione d'entrata di .pl sovrascrive lo scale: la carta compariva gigante e poi si rimpiccioliva */
 .eq-print-in,.eq-lb-scale{animation:none!important}
+/* Tablet (8–11"): la barra delle sezioni sta tutta in una riga anche in verticale */
+@media (min-width:601px) and (max-width:1060px){.hub-nav{gap:1px}.hub-nav button{padding:6px 9px;gap:5px;font-size:.8rem}.hub-nav .nb{display:none}.hub-nav svg{width:15px;height:15px}}
+/* Schermi touch: bersagli più grandi per i tocchi frequenti al tavolo */
+@media (pointer:coarse){
+ .pcc .pip.hp,.pcc .pip.st{width:19px;height:16px}.pcc .pip.hope{width:15px;height:15px;margin:3px 4px}.pcc .pip.ar{width:17px;height:19px}.pcc .pips{gap:4px}
+ .fp{width:18px;height:18px}.fear-pips{gap:5px;max-width:none}
+ .pl-paper-pips button:not(.pl-pip-reset){min-height:27px}.pl-pip-reset{min-width:24px;min-height:24px}
+ .eq-owned-actions .btn,.pl-official-sheet .eq-owned-actions .btn{min-height:32px;padding:6px 11px}
+ .pl-tabs .btn,.pl-actions .btn,.pl-print-bar .btn,.eqp-row button{min-height:36px}
+ .chat-tab{min-height:40px}.chat-pop form button{min-width:44px}
+ .bv-modal-toolbar button{width:40px;height:40px}
+ .lb-x,.lb-nav{min-width:48px;min-height:48px}
+}
+/* tablet in verticale: nella scheda avversario l'illustrazione va sopra e il testo prende tutta la larghezza */
+@media (min-width:761px) and (max-width:900px){.bv-modal-content{grid-template-columns:1fr}.bv-art{position:relative;height:300px;min-height:300px;padding:20px 20px 50px;border-right:0!important;border-bottom:1px solid var(--line)}.bv-art img{max-height:220px;max-width:90%}.bv-art-ring{width:240px}.bv-art figcaption{bottom:12px}}
