@@ -515,6 +515,9 @@ html{scrollbar-gutter:stable}.pv-hub.glass .hub-nav .nb{display:inline-block}#ba
 .eq-print-src{position:absolute;left:2mm;right:2mm;bottom:1.3mm;padding-top:.8mm;border-top:.2mm solid rgba(80,70,90,.18);font:600 4.6pt/1 'DH Overpass',Arial,sans-serif;letter-spacing:.04em;color:#8a8190;text-align:right}
 .eq-print-in .eq-card-content{padding-bottom:30px!important}
 .eq-print-in .eq-card-content{padding-bottom:38px!important}
+/* carte da ritagliare: rettangolari, a filo con le linee di taglio (un taglio separa due carte) */
+.eq-print,.eq-print-in .eq-card,.eq-print-in .kcard,.eq-print-in .cd-i,.eq-print-in .eq-art{border-radius:0!important}
+.eqp-cell .eq-print{box-shadow:none!important}
 .eq-ico{width:1.05em;height:1.05em;vertical-align:-.17em;margin-right:.28em;color:var(--dc,#7a6a86);flex:none}
 /* come nel manuale: banner della classe scuro e obliquo, riquadri aperti fino al bordo del foglio */
 .pr-page{padding:0 0 4mm;gap:3.4mm}
@@ -679,8 +682,8 @@ body.eq-dragging [data-eq-slot]{outline:2px dashed color-mix(in srgb,var(--sheet
 .eqp-scale{transform-origin:0 0;flex:none}
 .eqp-page{width:210mm;height:297mm;box-sizing:border-box;background:#fff;padding:12mm 0 0;display:flex;flex-direction:column;align-items:center;box-shadow:0 10px 40px rgba(0,0,0,.45)}
 .pl-print-capture .eqp-page{box-shadow:none}
-.eqp-grid{display:grid;grid-template-columns:repeat(4,41mm);grid-auto-rows:63mm;gap:2mm}
-.eqp-cell{position:relative;outline:.2mm dashed #b9b2c0;outline-offset:.5mm}.eqp-cell.empty{outline-color:#eee}
+.eqp-grid{display:grid;grid-template-columns:repeat(4,41mm);grid-auto-rows:63mm;gap:0}
+.eqp-cell{position:relative;outline:.2mm dashed #b9b2c0;outline-offset:-.1mm}.eqp-cell.empty{outline-color:#eee}
 .eqp-page footer{margin-top:auto;padding:0 0 7mm;font:7pt 'DH Overpass',Arial,sans-serif;color:#9a90a2}
 @media (max-width:760px){.eqp-body{flex-direction:column}.eqp-side{width:auto;max-height:45vh}}
 .eqp-kinds{display:flex;flex-wrap:wrap;gap:4px 12px;width:100%;font-size:12.5px;margin-bottom:4px}.eqp-kinds label{display:flex;align-items:center;gap:4px;cursor:pointer}
